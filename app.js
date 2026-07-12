@@ -1019,8 +1019,15 @@ function renderCalendar() {
         
         cell.innerHTML = `<span class="day-number">${d}</span>`;
         
-        // Find if user has a meal logged on this day
-        const dayMeals = posts.filter(post => post.date === dateStr);
+        // Find if user has a meal logged on this day (only show the logged-in user's own meals)
+        const dayMeals = posts.filter(post => {
+            if (post.date !== dateStr) return false;
+            if (db) {
+                return currentUser && post.userId === currentUser.uid;
+            } else {
+                return post.username === 'あなた';
+            }
+        });
         
         if (dayMeals.length > 0) {
             cell.classList.add('has-meal');
