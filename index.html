@@ -180,6 +180,48 @@
                             <button class="gacha-action-btn secondary" id="gachaRetryBtn">もう一度回す</button>
                         </div>
                     </div>
+
+                    <!-- Gacha Recipe Manager Accordion -->
+                    <div class="gacha-manager-accordion" id="gachaManagerAccordion">
+                        <button class="accordion-header" id="accordionHeader">
+                            <span>レシピの追加・管理 ⚙️</span>
+                            <span class="accordion-icon">▼</span>
+                        </button>
+                        <div class="accordion-content" id="accordionContent">
+                            <form id="addRecipeForm" class="add-recipe-form">
+                                <div class="form-group">
+                                    <label for="recipeUrl" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">YouTube動画のURL または ID *</label>
+                                    <input type="text" id="recipeUrl" placeholder="https://www.youtube.com/watch?v=... または ID" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box;">
+                                </div>
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label for="recipeTitle" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">料理名 *</label>
+                                    <input type="text" id="recipeTitle" placeholder="料理名を入力 (例: 至高の生姜焼き)" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box;">
+                                </div>
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label for="recipeCreator" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">紹介者・チャンネル名 *</label>
+                                    <input type="text" id="recipeCreator" placeholder="チャンネル名などを入力 (例: 料理研究家リュウジ)" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box;">
+                                </div>
+                                <div class="form-row" style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="recipeStyle" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">ジャンル *</label>
+                                        <select id="recipeStyle" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                            <option value="japanese">和風 🇯🇵</option>
+                                            <option value="western">洋風 🍔</option>
+                                            <option value="chinese">中華 🇨🇳</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="recipeTaste" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">ボリューム *</label>
+                                        <select id="recipeTaste" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                            <option value="light">あっさり 🥗</option>
+                                            <option value="heavy">ガッツリ 🍖</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="gacha-btn" style="margin-top: 16px; width: 100%; padding: 12px; box-shadow: 0 4px 10px rgba(255,192,69,0.25);">ガチャに新レシピを登録する ✨</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -429,6 +471,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.2"></script>
+    <script src="app.js?v=2.4"></script>
 </body>
 </html>

@@ -151,6 +151,16 @@ const gachaRetryBtn = document.getElementById('gachaRetryBtn');
 const gachaAddCalendarBtn = document.getElementById('gachaAddCalendarBtn');
 const gachaYoutubeIframe = document.getElementById('gachaYoutubeIframe');
 
+// Gacha Recipe Manager Elements
+const gachaManagerAccordion = document.getElementById('gachaManagerAccordion');
+const accordionHeader = document.getElementById('accordionHeader');
+const addRecipeForm = document.getElementById('addRecipeForm');
+const recipeUrlInput = document.getElementById('recipeUrl');
+const recipeTitleInput = document.getElementById('recipeTitle');
+const recipeCreatorInput = document.getElementById('recipeCreator');
+const recipeStyleSelect = document.getElementById('recipeStyle');
+const recipeTasteSelect = document.getElementById('recipeTaste');
+
 // Gacha State
 let youtubeRecipes = [];
 let currentSelectedRecipe = null;
@@ -455,6 +465,14 @@ function initEventListeners() {
     gachaLever.addEventListener('click', spinGacha);
     gachaRetryBtn.addEventListener('click', spinGacha);
     gachaAddCalendarBtn.addEventListener('click', useRecipeForMeal);
+
+    // Gacha Recipe Manager Accordion Toggle
+    accordionHeader.addEventListener('click', () => {
+        gachaManagerAccordion.classList.toggle('open');
+    });
+
+    // Gacha Recipe Register Form Submit
+    addRecipeForm.addEventListener('submit', handleRegisterRecipe);
 
     // Gacha Filter Clicks
     const styleFilterBtns = document.querySelectorAll('#gachaFilterStyle .gacha-filter-btn');
@@ -1562,14 +1580,15 @@ function updateStreak() {
 
 // --- Load recipes dynamically ---
 function loadRecipes() {
-    fetch('recipes.json?v=2.2')
+    fetch('recipes.json?v=2.3')
         .then(res => {
             if (!res.ok) throw new Error("recipes.json not found");
             return res.json();
         })
         .then(data => {
             youtubeRecipes = data;
-            console.log(`Loaded ${youtubeRecipes.length} recipes successfully!`);
+            console.log(`Loaded ${youtubeRecipes.length} recipes from json!`);
+            mergeCustomRecipes();
         })
         .catch(err => {
             console.error("Failed to load recipes.json:", err);
@@ -1578,7 +1597,39 @@ function loadRecipes() {
                 { "id": "FwD6B2j9x3Q", "title": "極上生姜焼き", "creator": "コウケンテツ", "style": "japanese", "taste": "heavy" },
                 { "id": "hB3v5Jb8cDw", "title": "とろとろオムライス", "creator": "クラシル", "style": "western", "taste": "heavy" }
             ];
+            mergeCustomRecipes();
         });
+}
+
+// --- Fetch and merge custom user recipes from Firestore or LocalStorage ---
+function mergeCustomRecipes() {
+    if (db) {
+        db.collection('recipes').get().then(snap => {
+            if (!snap.empty) {
+                snap.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (!youtubeRecipes.some(r => r.id === data.id)) {
+                        youtubeRecipes.push(data);
+                    }
+                });
+                console.log(`Merged Firestore recipes. Total is now: ${youtubeRecipes.length}`);
+            }
+        }).catch(err => {
+            console.error("Failed to load custom recipes from Firestore:", err);
+        });
+    } else {
+        try {
+            const localCustoms = JSON.parse(localStorage.getItem('custom_recipes')) || [];
+            localCustoms.forEach(recipe => {
+                if (!youtubeRecipes.some(r => r.id === recipe.id)) {
+                    youtubeRecipes.push(recipe);
+                }
+            });
+            console.log(`Merged LocalStorage recipes. Total is now: ${youtubeRecipes.length}`);
+        } catch (err) {
+            console.error("Failed to load custom recipes from LocalStorage:", err);
+        }
+    }
 }
 
 // --- Spin Gacha Action (with filters and YouTube embed) ---
@@ -1651,6 +1702,116 @@ function useRecipeForMeal() {
     const ytThumbnailUrl = `https://img.youtube.com/vi/${currentSelectedRecipe.id}/hqdefault.jpg`;
     imagePreview.src = ytThumbnailUrl;
     imagePreview.style.display = 'block';
+}
+
+// --- Extract 11-char YouTube ID from URL or ID string ---
+function extractYoutubeId(url) {
+    if (!url) return null;
+    const cleanUrl = url.trim();
+    if (cleanUrl.length === 11 && !cleanUrl.includes('/') && !cleanUrl.includes('?')) {
+        return cleanUrl;
+    }
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = cleanUrl.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
+// --- Handle Recipe Manual Registration Form Submit ---
+function handleRegisterRecipe(e) {
+    e.preventDefault();
+
+    const rawUrl = recipeUrlInput.value;
+    const title = recipeTitleInput.value.trim();
+    const creator = recipeCreatorInput.value.trim();
+    const style = recipeStyleSelect.value;
+    const taste = recipeTasteSelect.value;
+
+    const videoId = extractYoutubeId(rawUrl);
+    if (!videoId) {
+        alert("有効なYouTubeの動画URLまたは11桁の動画IDを入力してください。");
+        return;
+    }
+
+    const newRecipe = {
+        id: videoId,
+        title: title,
+        creator: creator,
+        style: style,
+        taste: taste
+    };
+
+    if (db) {
+        db.collection('recipes').doc(videoId).set({
+            ...newRecipe,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            onRecipeAddSuccess(newRecipe);
+        }).catch(err => {
+            console.error("Failed to save recipe to Firestore:", err);
+            alert("Firestoreへの保存に失敗しました。");
+        });
+    } else {
+        try {
+            let localCustoms = JSON.parse(localStorage.getItem('custom_recipes')) || [];
+            localCustoms = localCustoms.filter(r => r.id !== videoId);
+            localCustoms.push(newRecipe);
+            localStorage.setItem('custom_recipes', JSON.stringify(localCustoms));
+            onRecipeAddSuccess(newRecipe);
+        } catch (err) {
+            console.error("Failed to save recipe to LocalStorage:", err);
+            alert("LocalStorageへの保存に失敗しました。");
+        }
+    }
+}
+
+// --- Trigger successful toast notification ---
+function onRecipeAddSuccess(recipe) {
+    if (!youtubeRecipes.some(r => r.id === recipe.id)) {
+        youtubeRecipes.push(recipe);
+    } else {
+        youtubeRecipes = youtubeRecipes.map(r => r.id === recipe.id ? recipe : r);
+    }
+
+    addRecipeForm.reset();
+    gachaManagerAccordion.classList.remove('open');
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = `「${recipe.title}」を追加登録しました！🎉`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--text-main);
+        color: #FFF;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        z-index: 99999;
+        animation: toast-fade 2s ease-in-out forwards;
+    `;
+
+    if (!document.getElementById('toast-style')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'toast-style';
+        styleSheet.textContent = `
+            @keyframes toast-fade {
+                0% { opacity: 0; transform: translate(-50%, 20px); }
+                15% { opacity: 1; transform: translate(-50%, 0); }
+                85% { opacity: 1; transform: translate(-50%, 0); }
+                100% { opacity: 0; transform: translate(-50%, -20px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.remove();
+    }, 2000);
 }
 
 // --- Utility Helpers ---

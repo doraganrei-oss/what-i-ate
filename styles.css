@@ -2309,3 +2309,61 @@ body {
     }
 }
 
+/* Gacha Recipe Manager Accordion */
+.gacha-manager-accordion {
+    margin-top: 32px;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    text-align: left;
+}
+
+.accordion-header {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-muted);
+    background-color: #FAF8F5;
+    transition: background-color 0.2s, color 0.2s;
+    box-sizing: border-box;
+}
+
+.accordion-header:hover {
+    background-color: #FFF8F6;
+    color: var(--primary-color);
+}
+
+.accordion-icon {
+    font-size: 10px;
+    transition: transform 0.2s;
+    color: var(--text-light);
+}
+
+.gacha-manager-accordion.open .accordion-icon {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.gacha-manager-accordion.open .accordion-content {
+    max-height: 600px;
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
