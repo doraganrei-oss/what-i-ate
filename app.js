@@ -113,6 +113,17 @@ const detailTitle = document.getElementById('detailTitle');
 const detailStarsInner = document.getElementById('detailStarsInner');
 const detailComment = document.getElementById('detailComment');
 
+// User Home Modal Elements
+const userHomeModal = document.getElementById('userHomeModal');
+const closeUserHomeModalBtn = document.getElementById('closeUserHomeModalBtn');
+const userHomeAvatar = document.getElementById('userHomeAvatar');
+const userHomeName = document.getElementById('userHomeName');
+const userHomeBio = document.getElementById('userHomeBio');
+const userHomeFollowersCount = document.getElementById('userHomeFollowersCount');
+const userHomeFollowingCount = document.getElementById('userHomeFollowingCount');
+const userHomeFollowBtn = document.getElementById('userHomeFollowBtn');
+const userHomeGrid = document.getElementById('userHomeGrid');
+
 // Calendar Elements
 const calendarTitle = document.getElementById('calendarTitle');
 const calendarDays = document.getElementById('calendarDays');
@@ -385,6 +396,16 @@ function initEventListeners() {
         detailModal.classList.remove('active');
     });
 
+    // User Home Modal Closing
+    closeUserHomeModalBtn.addEventListener('click', () => {
+        userHomeModal.classList.remove('active');
+    });
+    userHomeModal.addEventListener('click', (e) => {
+        if (e.target === userHomeModal) {
+            userHomeModal.classList.remove('active');
+        }
+    });
+
     // Calendar Navigation
     prevMonthBtn.addEventListener('click', () => {
         calendarDate.setMonth(calendarDate.getMonth() - 1);
@@ -623,7 +644,7 @@ function renderFeed() {
 
         card.innerHTML = `
             <div class="post-header">
-                <div class="post-user-info">
+                <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
                     ${avatarHtml}
                     <span class="post-username">${post.username}</span>
                 </div>
@@ -981,7 +1002,219 @@ function openDetailModal(postId) {
     detailAuthorName.textContent = post.username || "匿名";
     detailAuthorBio.textContent = post.userBio || "自己紹介はありません。";
 
+    const detailAuthorCard = document.getElementById('detailAuthorCard');
+    detailAuthorCard.onclick = () => {
+        if (post.userId) {
+            detailModal.classList.remove('active');
+            openUserHome(post.userId);
+        }
+    };
+
     detailModal.classList.add('active');
+}
+
+// --- User Profile Home Modal Logic ---
+function openUserHome(targetUserId) {
+    if (!targetUserId) return;
+
+    userHomeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-light);">読み込み中...</div>';
+    userHomeModal.classList.add('active');
+
+    // Default Fallback details
+    let profileName = "ゲスト";
+    let profileAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFF0EC'/><text x='50' y='60' font-size='40' text-anchor='middle'>🥑</text></svg>";
+    let profileBio = "自己紹介はありません。";
+    let followers = [];
+    let following = [];
+
+    const isSelf = currentUser && targetUserId === currentUser.uid;
+
+    const applyUI = () => {
+        userHomeName.textContent = profileName;
+        userHomeAvatar.src = profileAvatar;
+        userHomeBio.textContent = profileBio;
+        userHomeFollowersCount.textContent = followers.length;
+        userHomeFollowingCount.textContent = following.length;
+
+        // Set Follow Button states
+        if (isSelf) {
+            userHomeFollowBtn.style.display = 'block';
+            userHomeFollowBtn.textContent = "プロフィール設定 ⚙️";
+            userHomeFollowBtn.className = "follow-btn edit-profile";
+            userHomeFollowBtn.onclick = () => {
+                userHomeModal.classList.remove('active');
+                openProfileModalSetup();
+            };
+        } else {
+            if (!currentUser) {
+                userHomeFollowBtn.style.display = 'none';
+            } else {
+                userHomeFollowBtn.style.display = 'block';
+                const isFollowing = followers.includes(currentUser.uid);
+                if (isFollowing) {
+                    userHomeFollowBtn.textContent = "フォロー中 ✓";
+                    userHomeFollowBtn.className = "follow-btn following";
+                } else {
+                    userHomeFollowBtn.textContent = "フォローする 👤+";
+                    userHomeFollowBtn.className = "follow-btn not-following";
+                }
+                userHomeFollowBtn.onclick = () => toggleFollowUser(targetUserId);
+            }
+        }
+
+        // Render target user's posts
+        const userPosts = posts.filter(p => p.userId === targetUserId);
+        userHomeGrid.innerHTML = '';
+        if (userPosts.length === 0) {
+            userHomeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 13px;">まだ投稿がありません。</div>';
+            return;
+        }
+
+        userPosts.forEach(post => {
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            
+            const starsHtml = '★'.repeat(post.rating) + '☆'.repeat(5 - post.rating);
+            const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
+            const avatarHtml = isCustomImage 
+                ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
+                : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
+                
+            const isOwner = db 
+                ? (currentUser && post.userId === currentUser.uid) 
+                : (post.username === 'あなた');
+                
+            const actionButtonsHtml = isOwner 
+                ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
+                   <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
+                : '';
+
+            const hasLiked = db
+                ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
+                : (getLikedPostsLocal().includes(post.id));
+            const activeClass = hasLiked ? 'active' : '';
+
+            card.innerHTML = `
+                <div class="post-header">
+                    <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
+                        ${avatarHtml}
+                        <span class="post-username">${post.username}</span>
+                    </div>
+                    <div class="post-meta">
+                        <span class="post-time">${formatDate(post.date)}</span>
+                        <div class="post-badges">
+                            <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
+                            <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
+                            ${actionButtonsHtml}
+                        </div>
+                    </div>
+                </div>
+                <div class="post-img-container" onclick="openDetailModal('${post.id}')">
+                    <img src="${post.image}" class="post-img" alt="${post.dishName}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
+                </div>
+                <div class="post-body">
+                    <div class="post-title-row">
+                        <h3 class="post-dish-name">${post.dishName}</h3>
+                        <div class="post-stars">${starsHtml}</div>
+                    </div>
+                    <p class="post-comment">${post.comment || 'メモはありません。'}</p>
+                    <div class="post-actions">
+                        <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
+                            <span class="btn-emoji">🤤</span>
+                            <span class="btn-text">美味しそう！</span>
+                            <span class="delicious-count">${post.deliciousCount || 0}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            userHomeGrid.appendChild(card);
+        });
+    };
+
+    if (db) {
+        db.collection('users').doc(targetUserId).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                profileName = data.nickname || "匿名";
+                profileAvatar = data.avatar || profileAvatar;
+                profileBio = data.bio || "自己紹介はありません。";
+                followers = data.followers || [];
+                following = data.following || [];
+            } else {
+                const userPost = posts.find(p => p.userId === targetUserId);
+                if (userPost) {
+                    profileName = userPost.username;
+                    profileAvatar = userPost.avatar || profileAvatar;
+                    profileBio = userPost.userBio || "自己紹介はありません。";
+                }
+            }
+            applyUI();
+        }).catch(err => {
+            console.error("Error loading user profile:", err);
+            applyUI();
+        });
+    } else {
+        profileName = targetUserId === 'あなた' ? 'あなた' : targetUserId;
+        const userPost = posts.find(p => p.username === profileName);
+        if (userPost) {
+            profileAvatar = userPost.avatar || profileAvatar;
+        }
+        applyUI();
+    }
+}
+
+// --- Follow/Unfollow Handler ---
+function toggleFollowUser(targetUserId) {
+    if (!db || !currentUser || targetUserId === currentUser.uid) return;
+
+    db.collection('users').doc(targetUserId).get().then(doc => {
+        if (!doc.exists) {
+            const userPost = posts.find(p => p.userId === targetUserId);
+            return db.collection('users').doc(targetUserId).set({
+                nickname: userPost ? userPost.username : "匿名",
+                avatar: userPost ? userPost.avatar : "",
+                bio: userPost ? userPost.userBio : "",
+                followers: [],
+                following: []
+            });
+        }
+    }).then(() => {
+        return Promise.all([
+            db.collection('users').doc(currentUser.uid).get(),
+            db.collection('users').doc(targetUserId).get()
+        ]);
+    }).then(([selfDoc, targetDoc]) => {
+        const selfData = selfDoc.exists ? selfDoc.data() : { following: [], followers: [] };
+        const targetData = targetDoc.data();
+
+        const selfFollowing = selfData.following || [];
+        const targetFollowers = targetDoc.exists ? (targetData.followers || []) : [];
+
+        const isFollowing = targetFollowers.includes(currentUser.uid);
+
+        let updateSelf, updateTarget;
+        if (isFollowing) {
+            updateSelf = db.collection('users').doc(currentUser.uid).update({
+                following: firebase.firestore.FieldValue.arrayRemove(targetUserId)
+            });
+            updateTarget = db.collection('users').doc(targetUserId).update({
+                followers: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+            });
+        } else {
+            updateSelf = db.collection('users').doc(currentUser.uid).set({
+                following: firebase.firestore.FieldValue.arrayUnion(targetUserId)
+            }, { merge: true });
+            updateTarget = db.collection('users').doc(targetUserId).update({
+                followers: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+            });
+        }
+
+        return Promise.all([updateSelf, updateTarget]);
+    }).then(() => {
+        openUserHome(targetUserId);
+    }).catch(err => {
+        console.error("Failed to follow/unfollow user:", err);
+    });
 }
 
 // --- Calendar Rendering Logic ---
@@ -1098,7 +1331,7 @@ function renderLikes() {
         
         card.innerHTML = `
             <div class="post-header">
-                <div class="post-user-info">
+                <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
                     ${avatarHtml}
                     <span class="post-username">${post.username}</span>
                 </div>

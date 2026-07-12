@@ -342,12 +342,53 @@
         </div>
     </div>
 
+    <!-- User Home Modal -->
+    <div class="modal-overlay" id="userHomeModal">
+        <div class="modal-content user-home-content">
+            <button class="close-btn" id="closeUserHomeModalBtn">&times;</button>
+            
+            <!-- Profile Header Info -->
+            <div class="user-home-profile">
+                <img id="userHomeAvatar" src="" class="user-home-avatar-img" alt="アバター">
+                <h2 id="userHomeName">ユーザー名</h2>
+                <p id="userHomeBio" class="user-home-bio">自己紹介はありません。</p>
+                
+                <!-- Follow Statistics -->
+                <div class="user-home-stats">
+                    <div class="stat-item">
+                        <span id="userHomeFollowersCount" class="stat-number">0</span>
+                        <span class="stat-label">フォロワー</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="userHomeFollowingCount" class="stat-number">0</span>
+                        <span class="stat-label">フォロー中</span>
+                    </div>
+                </div>
+                
+                <!-- Follow Button -->
+                <button id="userHomeFollowBtn" class="follow-btn">フォローする</button>
+            </div>
+            
+            <!-- Posts Section Divider -->
+            <div class="user-home-divider">
+                <span>投稿一覧</span>
+            </div>
+            
+            <!-- Scrollable User Posts Grid -->
+            <div class="user-home-grid-container">
+                <div class="feed-grid" id="userHomeGrid">
+                    <!-- Dynamically filled with user's posts -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=1.9"></script>
+    <script src="app.js?v=2.0"></script>
 </body>
 </html>
