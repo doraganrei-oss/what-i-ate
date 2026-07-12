@@ -148,6 +148,16 @@ const gachaResultCard = document.getElementById('gachaResultCard');
 const gachaResultTitle = document.getElementById('gachaResultTitle');
 const gachaResultDesc = document.getElementById('gachaResultDesc');
 const gachaRetryBtn = document.getElementById('gachaRetryBtn');
+const gachaAddCalendarBtn = document.getElementById('gachaAddCalendarBtn');
+const gachaYoutubeIframe = document.getElementById('gachaYoutubeIframe');
+
+// Gacha State
+let youtubeRecipes = [];
+let currentSelectedRecipe = null;
+let activeGachaFilters = {
+    style: 'all',
+    taste: 'all'
+};
 
 // Authentication & Profile Elements
 const loginOverlay = document.getElementById('loginOverlay');
@@ -173,6 +183,7 @@ const emailRegisterBtn = document.getElementById('emailRegisterBtn');
 document.addEventListener('DOMContentLoaded', () => {
     initData();
     initEventListeners();
+    loadRecipes();
 });
 
 // Load posts from LocalStorage or Firebase
@@ -443,6 +454,26 @@ function initEventListeners() {
     gachaBtn.addEventListener('click', spinGacha);
     gachaLever.addEventListener('click', spinGacha);
     gachaRetryBtn.addEventListener('click', spinGacha);
+    gachaAddCalendarBtn.addEventListener('click', useRecipeForMeal);
+
+    // Gacha Filter Clicks
+    const styleFilterBtns = document.querySelectorAll('#gachaFilterStyle .gacha-filter-btn');
+    styleFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            styleFilterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeGachaFilters.style = btn.getAttribute('data-val');
+        });
+    });
+
+    const tasteFilterBtns = document.querySelectorAll('#gachaFilterTaste .gacha-filter-btn');
+    tasteFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tasteFilterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeGachaFilters.taste = btn.getAttribute('data-val');
+        });
+    });
 
     // --- Authentication Event Listeners ---
     
@@ -1529,62 +1560,97 @@ function updateStreak() {
     streakCount.textContent = streak;
 }
 
-// --- Spin Gacha Action ---
-// --- Spin Gacha Action ---
+// --- Load recipes dynamically ---
+function loadRecipes() {
+    fetch('recipes.json?v=2.2')
+        .then(res => {
+            if (!res.ok) throw new Error("recipes.json not found");
+            return res.json();
+        })
+        .then(data => {
+            youtubeRecipes = data;
+            console.log(`Loaded ${youtubeRecipes.length} recipes successfully!`);
+        })
+        .catch(err => {
+            console.error("Failed to load recipes.json:", err);
+            youtubeRecipes = [
+                { "id": "Ry4B-G29LWs", "title": "至高のハンバーグ", "creator": "料理研究家リュウジ", "style": "western", "taste": "heavy" },
+                { "id": "FwD6B2j9x3Q", "title": "極上生姜焼き", "creator": "コウケンテツ", "style": "japanese", "taste": "heavy" },
+                { "id": "hB3v5Jb8cDw", "title": "とろとろオムライス", "creator": "クラシル", "style": "western", "taste": "heavy" }
+            ];
+        });
+}
+
+// --- Spin Gacha Action (with filters and YouTube embed) ---
 function spinGacha() {
-    // Prevent double clicking
     if (gachaLever.classList.contains('pulled')) return;
 
-    // 1. Pulled lever animation
+    let candidates = youtubeRecipes;
+    
+    if (activeGachaFilters.style !== 'all') {
+        candidates = candidates.filter(r => r.style === activeGachaFilters.style);
+    }
+    if (activeGachaFilters.taste !== 'all') {
+        candidates = candidates.filter(r => r.taste === activeGachaFilters.taste);
+    }
+
+    if (candidates.length === 0) {
+        alert("選択されたジャンルとボリュームに一致する料理動画がありません。フィルターを変更してください！");
+        return;
+    }
+
     gachaLever.classList.add('pulled');
-    
-    // Reset result view
     gachaResultCard.style.display = 'none';
-    
-    // 2. Rolling animation on screen
+    gachaYoutubeIframe.src = "";
+
     gachaScreenContent.innerHTML = '';
     const rollingText = document.createElement('div');
     rollingText.className = 'rolling';
-    rollingText.textContent = "🍔 🍜 🍳 🍱 🥞 🍣 🍛";
+    rollingText.textContent = "🍳 🍜 🥞 🍣 🍛 🍔 🍱";
     gachaScreenContent.appendChild(rollingText);
-    
-    // Try to filter other people's posts
-    let candidatePosts = posts.filter(p => p.userId && p.userId !== currentUser?.uid);
-    let usingRealPosts = true;
-    
-    // Fallback 1: If no other users, use all posts (including own)
-    if (candidatePosts.length === 0) {
-        candidatePosts = posts;
-    }
-    // Fallback 2: If still no posts at all in DB, use static GACHA_DB
-    if (candidatePosts.length === 0) {
-        candidatePosts = GACHA_DB;
-        usingRealPosts = false;
-    }
 
-    // Choose random candidate item
-    const selectedItem = candidatePosts[Math.floor(Math.random() * candidatePosts.length)];
+    const recipe = candidates[Math.floor(Math.random() * candidates.length)];
+    currentSelectedRecipe = recipe;
 
     setTimeout(() => {
-        // Reset lever
         gachaLever.classList.remove('pulled');
+
+        gachaScreenContent.innerHTML = `<span style="font-size: 38px; animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">🍳</span>`;
+
+        gachaResultTitle.textContent = recipe.title;
+        gachaResultDesc.textContent = `紹介：${recipe.creator} さん の人気レシピ動画です！`;
         
-        if (usingRealPosts) {
-            // Show real post image on gacha screen
-            gachaScreenContent.innerHTML = `<img src="${selectedItem.image}" alt="${selectedItem.dishName}" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 3px solid #FFC045; box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">`;
-            
-            // Directly open the screenshot-like detail modal!
-            openDetailModal(selectedItem.id);
-        } else {
-            // Show mock emoji on gacha screen
-            gachaScreenContent.innerHTML = `<span style="font-size: 36px; animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">${selectedItem.emoji}</span>`;
-            
-            // Show mock result details
-            gachaResultTitle.textContent = selectedItem.title;
-            gachaResultDesc.textContent = selectedItem.desc;
-            gachaResultCard.style.display = 'block';
-        }
-    }, 1500); // Roll for 1.5 seconds
+        gachaYoutubeIframe.src = `https://www.youtube.com/embed/${recipe.id}`;
+
+        gachaResultCard.style.display = 'block';
+
+        gachaResultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 1500);
+}
+
+// --- Use Gacha Recipe to Record a Meal ---
+function useRecipeForMeal() {
+    if (!currentSelectedRecipe) return;
+
+    gachaResultCard.style.display = 'none';
+    addMealModal.classList.add('active');
+
+    const dishNameInput = document.getElementById('dishName');
+    const commentInput = document.getElementById('comment');
+    const ratingInput = document.getElementById('rating');
+    const mealTypeSelect = document.getElementById('mealType');
+    const categorySelect = document.getElementById('category');
+    const imagePreview = document.getElementById('imagePreview');
+
+    dishNameInput.value = currentSelectedRecipe.title;
+    commentInput.value = `YouTubeで「${currentSelectedRecipe.creator}」さんの人気レシピ動画を観て作りました！🎬✨`;
+    ratingInput.value = "5";
+    mealTypeSelect.value = "dinner";
+    categorySelect.value = "self-cooked";
+
+    const ytThumbnailUrl = `https://img.youtube.com/vi/${currentSelectedRecipe.id}/hqdefault.jpg`;
+    imagePreview.src = ytThumbnailUrl;
+    imagePreview.style.display = 'block';
 }
 
 // --- Utility Helpers ---

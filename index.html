@@ -125,6 +125,27 @@
                     <h2>今日何食べる？ガチャ</h2>
                     <p class="gacha-subtitle">メニュー選びに迷ったら、ボタンを押して運に任せよう！</p>
                     
+                    <!-- Gacha Filters -->
+                    <div class="gacha-filters">
+                        <div class="gacha-filter-group">
+                            <span class="gacha-filter-label">ジャンル:</span>
+                            <div class="gacha-filter-options" id="gachaFilterStyle">
+                                <button class="gacha-filter-btn active" data-val="all">すべて</button>
+                                <button class="gacha-filter-btn" data-val="japanese">和風 🇯🇵</button>
+                                <button class="gacha-filter-btn" data-val="western">洋風 🍔</button>
+                                <button class="gacha-filter-btn" data-val="chinese">中華 🇨🇳</button>
+                            </div>
+                        </div>
+                        <div class="gacha-filter-group">
+                            <span class="gacha-filter-label">ボリューム:</span>
+                            <div class="gacha-filter-options" id="gachaFilterTaste">
+                                <button class="gacha-filter-btn active" data-val="all">すべて</button>
+                                <button class="gacha-filter-btn" data-val="light">あっさり 🥗</button>
+                                <button class="gacha-filter-btn" data-val="heavy">ガッツリ 🍖</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="gacha-machine-wrapper">
                         <div class="gacha-machine" id="gachaMachine">
                             <div class="gacha-screen">
@@ -144,11 +165,19 @@
 
                     <!-- Gacha Result Modal Overlay (within page) -->
                     <div class="gacha-result-card" id="gachaResultCard" style="display: none;">
-                        <span class="result-badge">本日のラッキーメニュー</span>
+                        <span class="result-badge">本日のラッキーレシピ ✨</span>
                         <h3 id="gachaResultTitle">とろとろオムライス</h3>
-                        <p class="gacha-result-desc" id="gachaResultDesc">ふわふわの卵に包まれたケチャップライス。一口食べれば幸せになれる定番メニューです！</p>
+                        
+                        <!-- Embedded YouTube Video -->
+                        <div class="gacha-youtube-container">
+                            <iframe id="gachaYoutubeIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+
+                        <p class="gacha-result-desc" id="gachaResultDesc">レシピ動画を観ながら作ってみましょう！</p>
+                        
                         <div class="gacha-result-actions">
-                            <button class="gacha-action-btn secondary" id="gachaRetryBtn" style="width: 100%;">もう一度回す</button>
+                            <button class="gacha-action-btn primary" id="gachaAddCalendarBtn">このレシピで作る！ 🍳</button>
+                            <button class="gacha-action-btn secondary" id="gachaRetryBtn">もう一度回す</button>
                         </div>
                     </div>
                 </div>
@@ -400,6 +429,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.1"></script>
+    <script src="app.js?v=2.2"></script>
 </body>
 </html>
