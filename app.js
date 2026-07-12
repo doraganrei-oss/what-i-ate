@@ -164,6 +164,9 @@ const editProfileBtn = document.getElementById('editProfileBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const closeLoginBtn = document.getElementById('closeLoginBtn');
 const headerLoginBtn = document.getElementById('headerLoginBtn');
+const toggleEmailFormBtn = document.getElementById('toggleEmailFormBtn');
+const emailLoginForm = document.getElementById('emailLoginForm');
+const emailRegisterBtn = document.getElementById('emailRegisterBtn');
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -432,6 +435,57 @@ function initEventListeners() {
         firebase.auth().signInWithPopup(provider).catch(err => {
             console.error("Google login failed:", err);
             alert("ログインに失敗しました。");
+        });
+    });
+
+    // Toggle Email Form Click
+    toggleEmailFormBtn.addEventListener('click', () => {
+        const isHidden = emailLoginForm.style.display === 'none';
+        emailLoginForm.style.display = isHidden ? 'flex' : 'none';
+        toggleEmailFormBtn.textContent = isHidden ? 'メールログインフォームを閉じる' : 'メールアドレスでログイン / 登録';
+    });
+
+    // Email Login Submit
+    emailLoginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        firebase.auth().signInWithEmailAndPassword(email, password).catch(err => {
+            console.error("Email login failed:", err);
+            let errMsg = "ログインに失敗しました。";
+            if (err.code === "auth/user-not-found") {
+                errMsg = "ユーザーが見つかりません。新規登録をおこなってください。";
+            } else if (err.code === "auth/wrong-password") {
+                errMsg = "パスワードが正しくありません。";
+            } else if (err.code === "auth/invalid-email") {
+                errMsg = "無効なメールアドレス形式です。";
+            }
+            alert(errMsg);
+        });
+    });
+
+    // Email Register Click
+    emailRegisterBtn.addEventListener('click', () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!email || password.length < 6) {
+            alert("メールアドレスと6文字以上のパスワードを入力してください。");
+            return;
+        }
+        
+        firebase.auth().createUserWithEmailAndPassword(email, password).catch(err => {
+            console.error("Email registration failed:", err);
+            let errMsg = "アカウント登録に失敗しました。";
+            if (err.code === "auth/email-already-in-use") {
+                errMsg = "このメールアドレスは既に登録されています。";
+            } else if (err.code === "auth/weak-password") {
+                errMsg = "パスワードが弱すぎます。6文字以上にしてください。";
+            } else if (err.code === "auth/invalid-email") {
+                errMsg = "無効なメールアドレス形式です。";
+            }
+            alert(errMsg);
         });
     });
 

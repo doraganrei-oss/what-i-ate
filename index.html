@@ -340,6 +340,28 @@
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="google-logo">
                     <span>Googleアカウントでログイン</span>
                 </button>
+
+                <div class="login-divider">
+                    <span>または</span>
+                </div>
+
+                <!-- Email Login Form Toggle -->
+                <button type="button" class="login-toggle-email-btn" id="toggleEmailFormBtn">メールアドレスでログイン / 登録</button>
+
+                <!-- Hidden Email Form -->
+                <form id="emailLoginForm" class="email-login-form" style="display: none;">
+                    <div class="form-group" style="width:100%; margin-bottom:0;">
+                        <input type="email" id="loginEmail" placeholder="メールアドレス" required class="login-input">
+                    </div>
+                    <div class="form-group" style="width:100%; margin-bottom:0;">
+                        <input type="password" id="loginPassword" placeholder="パスワード (6文字以上)" required minlength="6" class="login-input">
+                    </div>
+                    <div class="email-action-buttons">
+                        <button type="submit" class="email-btn primary" id="emailLoginBtn">ログイン</button>
+                        <button type="button" class="email-btn secondary" id="emailRegisterBtn">新規登録</button>
+                    </div>
+                </form>
+
                 <p class="login-footer-text">ログインすると、自分の食事の記録、他の人とのリアルタイム共有、投稿の削除ができます。</p>
             </div>
         </div>
@@ -389,6 +411,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=1.3"></script>
+    <script src="app.js?v=1.4"></script>
 </body>
 </html>
