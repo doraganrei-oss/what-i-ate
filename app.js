@@ -186,12 +186,6 @@ function initData() {
                     });
                 });
                 
-                // If database is completely empty, initialize it with defaults
-                if (posts.length === 0) {
-                    initializeFirestoreWithDefaults();
-                    return; // onSnapshot will trigger again
-                }
-                
                 renderFeed();
                 
                 // Update active tab data
@@ -227,23 +221,6 @@ function fallbackToLocalStorage() {
     updateStreak();
 }
 
-function initializeFirestoreWithDefaults() {
-    if (!db) return;
-    DEFAULT_POSTS.forEach((post) => {
-        db.collection('meals').doc(post.id).set({
-            username: post.username,
-            avatar: post.avatar,
-            dishName: post.dishName,
-            mealType: post.mealType,
-            category: post.category,
-            rating: post.rating,
-            comment: post.comment,
-            image: post.image,
-            deliciousCount: post.deliciousCount,
-            createdAt: firebase.firestore.Timestamp.fromDate(new Date(post.date))
-        }).catch(err => console.error("Error seeding defaults:", err));
-    });
-}
 
 // Set up all event listeners
 function initEventListeners() {
