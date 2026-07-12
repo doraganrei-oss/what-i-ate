@@ -145,7 +145,6 @@ const gachaScreenContent = document.getElementById('gachaScreenContent');
 const gachaResultCard = document.getElementById('gachaResultCard');
 const gachaResultTitle = document.getElementById('gachaResultTitle');
 const gachaResultDesc = document.getElementById('gachaResultDesc');
-const gachaAcceptBtn = document.getElementById('gachaAcceptBtn');
 const gachaRetryBtn = document.getElementById('gachaRetryBtn');
 
 // Authentication & Profile Elements
@@ -415,13 +414,6 @@ function initEventListeners() {
     // Gacha Interaction
     gachaBtn.addEventListener('click', spinGacha);
     gachaLever.addEventListener('click', spinGacha);
-    gachaAcceptBtn.addEventListener('click', () => {
-        gachaResultCard.style.display = 'none';
-        // Auto fill form with gacha details
-        const selected = gachaResultTitle.textContent;
-        openModalBtn.click();
-        document.getElementById('dishName').value = selected;
-    });
     gachaRetryBtn.addEventListener('click', spinGacha);
 
     // --- Authentication Event Listeners ---
@@ -1205,15 +1197,8 @@ function spinGacha() {
             // Show real post image on gacha screen
             gachaScreenContent.innerHTML = `<img src="${selectedItem.image}" alt="${selectedItem.dishName}" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 3px solid #FFC045; box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">`;
             
-            // Show result details
-            gachaResultTitle.textContent = selectedItem.dishName;
-            
-            const stars = '★'.repeat(selectedItem.rating) + '☆'.repeat(5 - selectedItem.rating);
-            gachaResultDesc.innerHTML = `
-                <div style="font-weight:700; color:var(--text-main); margin-bottom:4px;">「${selectedItem.username}」さんのご飯です！</div>
-                <div style="color:var(--secondary-color); font-size:12px; margin-bottom:8px;">${stars}</div>
-                <div style="font-style:italic; font-size:11px; color:var(--text-light);">「${selectedItem.comment || '（メモなし）'}」</div>
-            `;
+            // Directly open the screenshot-like detail modal!
+            openDetailModal(selectedItem.id);
         } else {
             // Show mock emoji on gacha screen
             gachaScreenContent.innerHTML = `<span style="font-size: 36px; animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">${selectedItem.emoji}</span>`;
@@ -1221,9 +1206,8 @@ function spinGacha() {
             // Show mock result details
             gachaResultTitle.textContent = selectedItem.title;
             gachaResultDesc.textContent = selectedItem.desc;
+            gachaResultCard.style.display = 'block';
         }
-        
-        gachaResultCard.style.display = 'block';
     }, 1500); // Roll for 1.5 seconds
 }
 
