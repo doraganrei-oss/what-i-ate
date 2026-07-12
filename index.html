@@ -316,6 +316,15 @@
                         </div>
                     </div>
                     <p class="detail-comment" id="detailComment">コメント</p>
+
+                    <!-- Author Profile Card -->
+                    <div class="detail-author-card" id="detailAuthorCard">
+                        <img id="detailAuthorAvatar" src="" class="detail-author-avatar" alt="プロフ">
+                        <div class="detail-author-info">
+                            <span id="detailAuthorName" class="detail-author-name">投稿者</span>
+                            <p id="detailAuthorBio" class="detail-author-bio">自己紹介はありません。</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -361,6 +370,12 @@
                         <input type="text" id="profileNickname" required placeholder="例：たべっ子、rei" maxlength="15">
                     </div>
 
+                    <!-- Bio -->
+                    <div class="form-group">
+                        <label for="profileBio">自己紹介</label>
+                        <textarea id="profileBio" rows="3" placeholder="趣味や好きな食べ物などを自由に書いてみましょう" maxlength="150"></textarea>
+                    </div>
+
                     <!-- Submit Profile -->
                     <button type="submit" class="submit-btn" id="saveProfileBtn">設定を保存する ✨</button>
                 </form>
@@ -374,6 +389,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=1.2"></script>
+    <script src="app.js?v=1.3"></script>
 </body>
 </html>

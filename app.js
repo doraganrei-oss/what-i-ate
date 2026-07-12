@@ -83,7 +83,7 @@ let posts = [];
 let currentFilter = 'all';
 let calendarDate = new Date();
 let currentUser = null;
-let userProfile = { nickname: "ゲスト", avatar: "" };
+let userProfile = { nickname: "ゲスト", avatar: "", bio: "" };
 let editingPostId = null;
 
 // --- DOM Elements ---
@@ -303,6 +303,7 @@ function updateUserProfileUI() {
 function openProfileModalSetup() {
     profileModal.classList.add('active');
     document.getElementById('profileNickname').value = userProfile.nickname || "";
+    document.getElementById('profileBio').value = userProfile.bio || "";
     if (userProfile.avatar) {
         profileImagePreview.src = userProfile.avatar;
         profileImagePreview.style.display = 'block';
@@ -521,15 +522,17 @@ function handleProfileSubmit(e) {
     const nickname = document.getElementById('profileNickname').value.trim();
     if (!nickname) return;
     
+    const bio = document.getElementById('profileBio').value.trim();
     const avatar = profileImagePreview.style.display !== 'none' ? profileImagePreview.src : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFF0EC'/><text x='50' y='60' font-size='40' text-anchor='middle'>🥑</text></svg>";
     
     if (db && currentUser) {
         db.collection('users').doc(currentUser.uid).set({
             nickname: nickname,
             avatar: avatar,
+            bio: bio,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
-            userProfile = { nickname, avatar };
+            userProfile = { nickname: nickname, avatar: avatar, bio: bio };
             profileModal.classList.remove('active');
             updateUserProfileUI();
             
@@ -727,6 +730,7 @@ function handleFormSubmit(e) {
     const newPost = {
         username: userProfile.nickname || "匿名",
         avatar: userProfile.avatar || "🥑",
+        userBio: userProfile.bio || "",
         dishName: dishName,
         mealType: mealType,
         category: mealCategory,
@@ -934,6 +938,17 @@ function openDetailModal(postId) {
     detailTitle.textContent = post.dishName;
     detailStarsInner.style.width = `${post.rating * 20}%`;
     detailComment.textContent = post.comment || "メモはありません。";
+
+    // Populate Author Profile Card
+    const detailAuthorAvatar = document.getElementById('detailAuthorAvatar');
+    const detailAuthorName = document.getElementById('detailAuthorName');
+    const detailAuthorBio = document.getElementById('detailAuthorBio');
+
+    const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
+    detailAuthorAvatar.src = isCustomImage ? post.avatar : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFF0EC'/><text x='50' y='60' font-size='40' text-anchor='middle'>🥑</text></svg>";
+    
+    detailAuthorName.textContent = post.username || "匿名";
+    detailAuthorBio.textContent = post.userBio || "自己紹介はありません。";
 
     detailModal.classList.add('active');
 }

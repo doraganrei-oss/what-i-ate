@@ -1667,3 +1667,43 @@ body {
     transform: translateY(0);
 }
 
+/* Detail Modal Poster Profile Card */
+.detail-author-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #FAF8F5;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    margin-top: 16px;
+}
+
+.detail-author-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.detail-author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.detail-author-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.detail-author-bio {
+    font-size: 11px;
+    color: var(--text-light);
+    line-height: 1.4;
+    margin: 0;
+}
+
