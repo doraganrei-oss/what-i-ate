@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MofuTube - 登録者10万人以下の知る人ぞ知る美男美女YouTuber名鑑</title>
+  <meta name="description" content="メンズ美容、ファッション、vlog、美女コーデなど、登録者10万人以下の本当に魅力的で応援したくなる美男美女YouTuberを紹介します。">
+  <link rel="stylesheet" href="./src/css/style.css?v=1.2">
+  <!-- Lucide Icons (アイコンフォント) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- ヘッダー / ナビゲーション -->
+  <header>
+    <div class="nav-container">
+      <a class="logo" id="logo-btn">
+        <span>💎</span> MofuTube <span>🌸</span>
+      </a>
+      <div class="nav-buttons">
+        <button class="btn" id="fav-toggle-btn">
+          <i data-lucide="heart"></i> お気に入り
+        </button>
+        <button class="btn btn-primary" id="admin-open-btn" style="display: none;">
+          <i data-lucide="plus-circle"></i> チャンネルを収集する
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ヒーローセクション -->
+  <section class="hero">
+    <h1>新たな推しに出会う場所<br><span>MofuTube</span></h1>
+    <p>登録者10万人以下限定。あなたがまだ知らない、極上の「ときめき」と「癒し」を届けるYouTuber名鑑。</p>
+  </section>
+
+  <!-- メインコンテンツ -->
+  <main>
+    <!-- カテゴリータブ (美男美女に特化) -->
+    <div class="categories-container">
+      <button class="tab-btn active" data-cat="all">すべて</button>
+      <button class="tab-btn" data-cat="ikemen">💎 美男</button>
+      <button class="tab-btn" data-cat="kawaii">🌸 美女</button>
+      <!-- 将来用にお休み中
+      <button class="tab-btn" data-cat="animal">🐾 動物系</button>
+      <button class="tab-btn" data-cat="food">🍰 食べ物系</button>
+      -->
+    </div>
+
+    <!-- 検索 & フィルターバー -->
+    <div class="filter-bar">
+      <div class="search-wrapper">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="search-input" class="search-input" placeholder="チャンネル名や特徴、タグで検索...">
+      </div>
+      <select id="vibe-filter" class="mood-filter">
+        <option value="all">✨ すべての系統</option>
+        <option value="💎 かっこいい系">💎 かっこいい系</option>
+        <option value="💎 かわいい系">💎 かわいい系</option>
+        <option value="🌸 きれい系">🌸 きれい系</option>
+        <option value="🌸 かわいい系">🌸 かわいい系</option>
+      </select>
+      <select id="genre-filter" class="mood-filter">
+        <option value="all">🎬 すべてのジャンル</option>
+        <option value="Vlog">🏠 Vlog</option>
+        <option value="美容">💄 美容</option>
+        <option value="ファッション">👗 ファッション</option>
+        <option value="ゲーム・雑談">🎮 ゲーム・雑談</option>
+        <option value="その他">☕ その他</option>
+      </select>
+      <select id="country-filter" class="mood-filter">
+        <option value="all">🌐 すべての地域</option>
+        <option value="日本人">🇯🇵 日本人</option>
+        <option value="韓国人">🇰🇷 韓国人</option>
+        <option value="外国人">🇺🇸 外国人</option>
+      </select>
+    </div>
+
+    <!-- チャンネルリストグリッド -->
+    <div class="channel-grid" id="channel-grid">
+      <!-- JavaScriptで動的にカードが挿入されます -->
+    </div>
+  </main>
+
+  <!-- 動画再生モーダル -->
+  <div class="modal" id="video-modal">
+    <div class="modal-content">
+      <button class="close-modal" id="video-close-btn">&times;</button>
+      <div class="video-container">
+        <iframe id="video-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div class="modal-info">
+        <h2 id="modal-channel-title">チャンネル名</h2>
+        <p id="modal-channel-desc">チャンネルの説明がここに入ります。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 管理者用：自動収集モーダル -->
+  <div class="modal" id="admin-modal">
+    <div class="modal-content">
+      <button class="close-modal" id="admin-close-btn">&times;</button>
+      <div class="modal-info" style="margin-bottom: 1.5rem;">
+        <h2>💎 美男美女YouTuber自動収集システム</h2>
+        <p>YouTube Data APIを使用して、指定した条件に合うチャンネルを自動検索し、既存データとの重複を自動で排除して収集します。</p>
+      </div>
+
+      <div class="admin-grid">
+        <!-- APIキーの入力 -->
+        <div class="form-group">
+          <label for="api-key-input">YouTube Data APIキー</label>
+          <input type="password" id="api-key-input" class="form-input" placeholder="APIキーを入力（ブラウザ内に安全に保存されます）">
+        </div>
+
+        <!-- 収集モードの選択 -->
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label style="font-family: var(--font-title); font-weight: 600; color: var(--text-secondary);">収集方法（モード）</label>
+          <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.4rem;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--text-primary);">
+              <input type="radio" name="collect-mode" value="youtube" checked style="accent-color: var(--color-ikemen);"> 🔍 YouTube検索
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--text-primary);">
+              <input type="radio" name="collect-mode" value="blog" style="accent-color: var(--color-ikemen);"> 🌐 ブログ全自動巡回
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--text-primary);">
+              <input type="radio" name="collect-mode" value="text" style="accent-color: var(--color-ikemen);"> 📝 X/SNS コピペ解析
+            </label>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <!-- 検索ワード (YT/Blog用) -->
+          <div class="form-group" id="search-query-group">
+            <label for="search-query-input">検索キーワード</label>
+            <input type="text" id="search-query-input" class="form-input" placeholder="例: 猫 癒やし, メンズメイク, 大食い">
+          </div>
+          <!-- コピペ入力欄 (Text用 - 初期状態非表示) -->
+          <div class="form-group" id="copied-text-group" style="display: none; grid-column: 1/-1;">
+            <label for="copied-text-input">コピペしたテキスト（Xの検索結果やブログの本文など）</label>
+            <textarea id="copied-text-input" class="form-input" rows="5" placeholder="X（Twitter）で「#新人YouTuber youtube.com」などと検索した画面や、まとめ記事の本文をCtrl+Aですべてコピーして、ここにそのまま貼り付けてください。リンクを自動抽出します。" style="font-family: inherit; resize: vertical;"></textarea>
+          </div>
+          <!-- 追加先カテゴリー (美男美女に特化) -->
+          <div class="form-group">
+            <label for="category-select">追加先カテゴリー</label>
+            <select id="category-select" class="form-input">
+              <option value="ikemen">💎 美男</option>
+              <option value="kawaii">🌸 美女</option>
+              <!-- 将来用にお休み中
+              <option value="animal">🐾 動物系</option>
+              <option value="food">🍰 食べ物系</option>
+              -->
+            </select>
+          </div>
+          <!-- 登録する系統 -->
+          <div class="form-group">
+            <label for="admin-vibe-select">登録する系統</label>
+            <select id="admin-vibe-select" class="form-input">
+              <option value="かっこいい・きれい系">💎 かっこいい・きれい系</option>
+              <option value="かわいい系">🌸 かわいい系</option>
+            </select>
+          </div>
+          <!-- 登録するジャンル -->
+          <div class="form-group">
+            <label for="admin-genre-select">登録するジャンル</label>
+            <select id="admin-genre-select" class="form-input">
+              <option value="Vlog">🏠 Vlog</option>
+              <option value="美容">💄 美容</option>
+              <option value="ファッション">👗 ファッション</option>
+              <option value="ゲーム・雑談">🎮 ゲーム・雑談</option>
+              <option value="その他">☕ その他</option>
+            </select>
+          </div>
+          <!-- 登録する地域・国籍 -->
+          <div class="form-group">
+            <label for="admin-country-select">登録する地域・国籍</label>
+            <select id="admin-country-select" class="form-input">
+              <option value="日本人">🇯🇵 日本人</option>
+              <option value="韓国人">🇰🇷 韓国人</option>
+              <option value="外国人">🇺🇸 外国人</option>
+            </select>
+          </div>
+          <!-- 優先する国・言語 (YTのみ) -->
+          <div class="form-group filter-yt-only">
+            <label for="lang-select">優先する地域・言語</label>
+            <select id="lang-select" class="form-input">
+              <option value="all">🌐 制限なし（グローバル）</option>
+              <option value="kr">🇰🇷 韓国（韓国語）</option>
+              <option value="us">🇺🇸 アメリカ/英語圏（英語）</option>
+              <option value="jp">🇯🇵 日本（日本語）</option>
+            </select>
+          </div>
+          <!-- 活動状態（休止対策） (YTのみ) -->
+          <div class="form-group filter-yt-only">
+            <label for="active-period-select">最終動画投稿日（休止対策）</label>
+            <select id="active-period-select" class="form-input">
+              <option value="3">📅 直近3ヶ月以内（推奨）</option>
+              <option value="1">📅 直近1ヶ月以内</option>
+              <option value="6">📅 直近6ヶ月以内</option>
+              <option value="any">🌐 制限なし（休止含む）</option>
+            </select>
+          </div>
+          <!-- 検索の並び順 (YTのみ) -->
+          <div class="form-group filter-yt-only">
+            <label for="order-select">検索結果の並び順</label>
+            <select id="order-select" class="form-input">
+              <option value="relevance">🔍 関連度順</option>
+              <option value="date">🕒 新着順（アクティブ重視）</option>
+              <option value="viewCount">🔥 再生回数順（人気重視）</option>
+            </select>
+          </div>
+          <!-- 登録者数の下限 -->
+          <div class="form-group">
+            <label for="min-subs-select">登録者数の下限</label>
+            <select id="min-subs-select" class="form-input">
+              <option value="1000">👥 1,000人以上（デフォルト）</option>
+              <option value="100">👥 100人以上</option>
+              <option value="0">👥 制限なし（0人〜）</option>
+            </select>
+          </div>
+          <!-- チャンネルの開設時期（新人フィルター） -->
+          <div class="form-group">
+            <label for="channel-age-select">チャンネル開設時期</label>
+            <select id="channel-age-select" class="form-input">
+              <option value="any">🌐 制限なし（すべて）</option>
+              <option value="3">🌱 開設3ヶ月以内（始めたて）</option>
+              <option value="6">🌱 開設6ヶ月以内（新人）</option>
+              <option value="12">📅 開設1年以内</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="admin-actions">
+          <button class="btn btn-primary" id="collect-start-btn" style="flex: 1;">
+            <i data-lucide="sparkles"></i> 自動収集を開始する
+          </button>
+          <button class="btn" id="export-btn" title="収集した全データをJSONファイルとしてエクスポートします">
+            <i data-lucide="download"></i> データをエクスポート
+          </button>
+        </div>
+
+        <!-- URLから直接追加 -->
+        <div style="border-top: 1px solid var(--border-glass); margin-top: 1.5rem; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem;">
+          <h3 style="font-family: var(--font-title); font-size: 1.1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="link" style="width: 18px; height: 18px; color: var(--color-ikemen);"></i> チャンネルURLからピンポイントで追加
+          </h3>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <input type="text" id="direct-url-input" class="form-input" placeholder="例: https://www.youtube.com/@mofucat または チャンネルID" style="flex: 1; min-width: 250px;">
+            <button class="btn btn-primary" id="direct-add-btn">
+              <i data-lucide="plus"></i> 追加
+            </button>
+          </div>
+        </div>
+
+        <!-- 収集結果表示エリア -->
+        <div class="form-group" style="margin-top: 1rem;">
+          <label id="collector-status-label">収集されたチャンネル (0件)</label>
+          <div class="collector-results" id="collector-results">
+            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+              キーワードを入力して収集を開始してください。<br>自動的に10万人以下のチャンネルが抽出され、重複は排除されます。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 属性編集モーダル (管理者専用) -->
+  <div class="modal" id="edit-modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <button class="modal-close" id="edit-close-btn">&times;</button>
+      <div class="modal-header">
+        <h2 style="font-family: var(--font-title); font-size: 1.5rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          <i data-lucide="edit" style="color: var(--color-ikemen); width: 24px; height: 24px;"></i> 属性を編集
+        </h2>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 1.2rem; margin-top: 1.5rem;">
+        <div>
+          <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">対象チャンネル</label>
+          <h3 id="edit-channel-title" style="font-size: 1.1rem; color: var(--text-primary); margin: 0; padding: 0.5rem 0; border-bottom: 1px solid var(--border-glass);">チャンネル名</h3>
+        </div>
+        <input type="hidden" id="edit-channel-id">
+        
+        <!-- カテゴリー -->
+        <div class="form-group">
+          <label for="edit-category-select">カテゴリー</label>
+          <select id="edit-category-select" class="form-input">
+            <option value="ikemen">💎 美男</option>
+            <option value="kawaii">🌸 美女</option>
+          </select>
+        </div>
+        
+        <!-- 系統 -->
+        <div class="form-group">
+          <label for="edit-vibe-select">系統</label>
+          <select id="edit-vibe-select" class="form-input">
+            <!-- 動的に生成されます -->
+          </select>
+        </div>
+        
+        <!-- ジャンル -->
+        <div class="form-group">
+          <label for="edit-genre-select">ジャンル</label>
+          <select id="edit-genre-select" class="form-input">
+            <option value="Vlog">🏠 Vlog</option>
+            <option value="美容">💄 美容</option>
+            <option value="ファッション">👗 ファッション</option>
+            <option value="ゲーム・雑談">🎮 ゲーム・雑談</option>
+            <option value="その他">☕ その他</option>
+          </select>
+        </div>
+        
+        <!-- 地域・国籍 -->
+        <div class="form-group">
+          <label for="edit-country-select">地域・国籍</label>
+          <select id="edit-country-select" class="form-input">
+            <option value="日本人">🇯🇵 日本人</option>
+            <option value="韓国人">🇰🇷 韓国人</option>
+            <option value="外国人">🌐 外国人</option>
+          </select>
+        </div>
+        
+        <button class="btn btn-primary" id="edit-save-btn" style="margin-top: 1rem; width: 100%;">
+          <i data-lucide="check"></i> 変更を保存する
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- フッター -->
+  <footer>
+    <p>&copy; 2026 MofuTube - あなたの推しが見つかる場所</p>
+    <p style="font-size: 0.8rem; margin-top: 0.5rem;">※掲載されているチャンネル情報は、個人の趣味・応援目的で引用して紹介しています。</p>
+  </footer>
+
+  <!-- メインJavaScriptの読み込み (CORS制限を回避し、ダブルクリックで動くように設定) -->
+  <script src="./src/data/channels.js?v=1.2"></script>
+  <script src="./src/js/collector.js?v=1.2"></script>
+  <script src="./src/main.js?v=1.2"></script>
+</body>
+</html>

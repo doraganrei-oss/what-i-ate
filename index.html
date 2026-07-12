@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>きょう何食べた？ | 毎日のごはん記録＆シェア</title>
+    <meta name="description" content="きょう食べたごはんを記録・共有する温かみのあるフードログアプリです。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <span class="logo-emoji">🍳</span>
+                <div class="logo-text">
+                    <h1>きょう何食べた？</h1>
+                    <p>Everyday Food Log</p>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="streak-badge" id="streakBadge" title="連続で投稿した日数">
+                    <span class="streak-icon">🔥</span>
+                    <span class="streak-count" id="streakCount">0</span>日連続
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Navigation Tabs -->
+        <nav class="app-nav">
+            <button class="nav-tab active" data-tab="timeline">
+                <span class="nav-icon">🕒</span>
+                <span class="nav-label">タイムライン</span>
+            </button>
+            <button class="nav-tab" data-tab="calendar">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">カレンダー</span>
+            </button>
+            <button class="nav-tab" data-tab="stats">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">ごはん分析</span>
+            </button>
+            <button class="nav-tab" data-tab="gacha">
+                <span class="nav-icon">🎰</span>
+                <span class="nav-label">献立ガチャ</span>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+            <!-- Timeline Section -->
+            <section id="tab-timeline" class="tab-panel active">
+                <div class="timeline-header">
+                    <h2>みんなのごはんフィード</h2>
+                    <div class="filter-bar">
+                        <button class="filter-btn active" data-filter="all">すべて</button>
+                        <button class="filter-btn" data-filter="morning">朝食</button>
+                        <button class="filter-btn" data-filter="lunch">昼食</button>
+                        <button class="filter-btn" data-filter="dinner">夕食</button>
+                        <button class="filter-btn" data-filter="snack">おやつ</button>
+                    </div>
+                </div>
+                <div class="feed-grid" id="feedGrid">
+                    <!-- Posts will be generated dynamically by JS -->
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section id="tab-calendar" class="tab-panel">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="cal-nav-btn">&lt;</button>
+                        <h2 id="calendarTitle">2026年 7月</h2>
+                        <button id="nextMonth" class="cal-nav-btn">&gt;</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="weekday">日</div>
+                        <div class="weekday">月</div>
+                        <div class="weekday">火</div>
+                        <div class="weekday">水</div>
+                        <div class="weekday">木</div>
+                        <div class="weekday">金</div>
+                        <div class="weekday">土</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays">
+                        <!-- Days will be generated dynamically by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Section -->
+            <section id="tab-stats" class="tab-panel">
+                <h2>ごはん分析スタッツ</h2>
+                <p class="stats-subtitle">今週のあなたの食生活レポート</p>
+                
+                <div class="stats-grid">
+                    <!-- Stat Card: Self-Cooked Ratio -->
+                    <div class="stats-card">
+                        <h3>自炊バランス</h3>
+                        <div class="chart-container">
+                            <div class="donut-chart-wrapper">
+                                <svg width="160" height="160" viewBox="0 0 160 160" class="donut-chart" id="selfCookedChart">
+                                    <circle class="donut-hole" cx="80" cy="80" r="60" fill="transparent"></circle>
+                                    <circle class="donut-ring" cx="80" cy="80" r="60" fill="transparent" stroke-width="16"></circle>
+                                    <circle class="donut-segment" id="selfCookedSegment" cx="80" cy="80" r="60" fill="transparent" stroke-width="16" stroke-dasharray="0 100" stroke-dashoffset="25"></circle>
+                                </svg>
+                                <div class="donut-center-text">
+                                    <span class="donut-percentage" id="selfCookedPercent">0%</span>
+                                    <span class="donut-label">自炊率</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item"><span class="legend-color self-cooked"></span> 自炊 (<span id="countSelf">0</span>)</div>
+                            <div class="legend-item"><span class="legend-color eating-out"></span> 外食 (<span id="countOut">0</span>)</div>
+                            <div class="legend-item"><span class="legend-color takeout"></span> 中食/その他 (<span id="countTakeout">0</span>)</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card: Meal Types -->
+                    <div class="stats-card">
+                        <h3>食事の分布</h3>
+                        <div class="bar-chart-container" id="mealDistribution">
+                            <div class="bar-row">
+                                <span class="bar-label">🌅 朝食</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill morning" id="fillMorning" style="width: 0%"></div>
+                                </div>
+                                <span class="bar-count" id="countMorning">0回</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-label">☀️ 昼食</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill lunch" id="fillLunch" style="width: 0%"></div>
+                                </div>
+                                <span class="bar-count" id="countLunch">0回</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-label">🌙 夕食</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill dinner" id="fillDinner" style="width: 0%"></div>
+                                </div>
+                                <span class="bar-count" id="countDinner">0回</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-label">☕ おやつ</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill snack" id="fillSnack" style="width: 0%"></div>
+                                </div>
+                                <span class="bar-count" id="countSnack">0回</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card: Satisfaction Index -->
+                    <div class="stats-card summary-card">
+                        <h3>食の満足度</h3>
+                        <div class="satisfaction-score">
+                            <span class="score-number" id="avgRating">0.0</span>
+                            <span class="score-max">/ 5.0</span>
+                        </div>
+                        <div class="stars-outer">
+                            <div class="stars-inner" id="avgStars" style="width: 0%"></div>
+                        </div>
+                        <p class="stats-comment" id="statsComment">たくさん記録して、食生活を振り返りましょう！</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gacha Section -->
+            <section id="tab-gacha" class="tab-panel">
+                <div class="gacha-container">
+                    <h2>今日何食べる？ガチャ</h2>
+                    <p class="gacha-subtitle">メニュー選びに迷ったら、ボタンを押して運に任せよう！</p>
+                    
+                    <div class="gacha-machine-wrapper">
+                        <div class="gacha-machine" id="gachaMachine">
+                            <div class="gacha-screen">
+                                <div class="gacha-screen-content" id="gachaScreenContent">
+                                    <span class="gacha-placeholder">❓</span>
+                                </div>
+                            </div>
+                            <div class="gacha-handle-area">
+                                <div class="gacha-lever" id="gachaLever">
+                                    <div class="lever-knob"></div>
+                                    <div class="lever-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="gacha-btn" id="gachaBtn">ガチャを回す！</button>
+                    </div>
+
+                    <!-- Gacha Result Modal Overlay (within page) -->
+                    <div class="gacha-result-card" id="gachaResultCard" style="display: none;">
+                        <span class="result-badge">本日のラッキーメニュー</span>
+                        <h3 id="gachaResultTitle">とろとろオムライス</h3>
+                        <p class="gacha-result-desc" id="gachaResultDesc">ふわふわの卵に包まれたケチャップライス。一口食べれば幸せになれる定番メニューです！</p>
+                        <div class="gacha-result-actions">
+                            <button class="gacha-action-btn primary" id="gachaAcceptBtn">これに決めた！</button>
+                            <button class="gacha-action-btn secondary" id="gachaRetryBtn">もう一度回す</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Floating Action Button to Add Meal -->
+        <button class="fab-btn" id="openModalBtn" title="食事を追加する">
+            <span class="fab-icon">+</span>
+        </button>
+
+        <!-- Add Meal Modal -->
+        <div class="modal-overlay" id="addMealModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>きょう何食べた？</h2>
+                    <button class="close-btn" id="closeModalBtn">&times;</button>
+                </div>
+                <form id="mealForm" class="meal-form">
+                    <!-- Photo Upload -->
+                    <div class="form-group image-upload-group">
+                        <label>ごはんの写真</label>
+                        <div class="dropzone" id="dropzone">
+                            <input type="file" id="imageFile" accept="image/*" class="file-input">
+                            <div class="dropzone-text" id="dropzoneText">
+                                <span class="dropzone-icon">📸</span>
+                                <p>クリックして写真をアップロード</p>
+                                <span class="dropzone-sub">またはここにドラッグ＆ドロップ</span>
+                            </div>
+                            <img id="imagePreview" class="image-preview" src="" alt="プレビュー" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Dish Name -->
+                    <div class="form-group">
+                        <label for="dishName">料理名 <span class="required">*</span></label>
+                        <input type="text" id="dishName" required placeholder="例：特製デミグラスオムライス、イチゴのショートケーキ">
+                    </div>
+
+                    <!-- Row: Meal Type & Category -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mealType">食べるタイミング <span class="required">*</span></label>
+                            <select id="mealType" required>
+                                <option value="morning">🌅 朝食</option>
+                                <option value="lunch" selected>☀️ 昼食</option>
+                                <option value="dinner">🌙 夕食</option>
+                                <option value="snack">☕ おやつ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mealCategory">カテゴリ <span class="required">*</span></label>
+                            <select id="mealCategory" required>
+                                <option value="self-cooked" selected>🍳 自炊</option>
+                                <option value="eating-out">🍔 外食</option>
+                                <option value="takeout">🍱 テイクアウト/お惣菜</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Star Rating -->
+                    <div class="form-group">
+                        <label>美味しさ評価</label>
+                        <div class="star-rating-input">
+                            <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="最高！">★</label>
+                            <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="美味しい">★</label>
+                            <input type="radio" id="star3" name="rating" value="3" checked><label for="star3" title="普通">★</label>
+                            <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="いまいち">★</label>
+                            <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="うーん">★</label>
+                        </div>
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="form-group">
+                        <label for="comment">ひ言メモ</label>
+                        <textarea id="comment" rows="3" placeholder="味の感想や、お店の名前などを自由にメモしましょう"></textarea>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="submit-btn">記録する！ 🎉</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Detail Dialog Modal -->
+        <div class="modal-overlay" id="detailModal">
+            <div class="modal-content detail-content">
+                <button class="close-btn" id="closeDetailModalBtn">&times;</button>
+                <div class="detail-img-container">
+                    <img id="detailImg" src="" alt="料理画像">
+                </div>
+                <div class="detail-body">
+                    <div class="detail-meta">
+                        <span class="detail-badge" id="detailMealType">朝食</span>
+                        <span class="detail-badge secondary" id="detailCategory">自炊</span>
+                        <span class="detail-time" id="detailTime">2026-07-02</span>
+                    </div>
+                    <h2 id="detailTitle">料理名</h2>
+                    <div class="detail-stars">
+                        <div class="stars-outer">
+                            <div class="stars-inner" id="detailStarsInner" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <p class="detail-comment" id="detailComment">コメント</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <!-- Application Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
