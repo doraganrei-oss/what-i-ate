@@ -355,6 +355,7 @@ function renderFeed() {
                     <div class="post-badges">
                         <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
                         <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
+                        ${post.username === 'あなた' ? `<button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` : ''}
                     </div>
                 </div>
             </div>
@@ -548,6 +549,25 @@ function handleDeliciousClick(button, postId, event) {
         // Update counter text inside this card only
         const countEl = button.querySelector('.delicious-count');
         if (countEl) countEl.textContent = post.deliciousCount;
+    }
+}
+
+// --- Delete Post Handler ---
+function handleDeletePostClick(postId, event) {
+    event.stopPropagation(); // Detailモーダルが開くのを防ぐ
+    if (!confirm("本当にこの投稿を削除しますか？")) return;
+    
+    if (db) {
+        db.collection('meals').doc(postId).delete().catch(err => {
+            console.error("Firestore delete failed:", err);
+            alert("削除に失敗しました。");
+        });
+    } else {
+        posts = posts.filter(p => p.id !== postId);
+        localStorage.setItem('what-i-ate-posts', JSON.stringify(posts));
+        renderFeed();
+        updateStats();
+        updateStreak();
     }
 }
 

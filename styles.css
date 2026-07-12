@@ -322,6 +322,31 @@ body {
 .post-badge.cat-out { background-color: #FFF9C4; color: #F57F17; }
 .post-badge.cat-takeout { background-color: #E0F2F1; color: #00796B; }
 
+.delete-post-btn {
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 2px 4px;
+    margin-left: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s, transform 0.1s;
+    user-select: none;
+}
+
+.delete-post-btn:hover {
+    background-color: #FFEBEE;
+    transform: scale(1.1);
+}
+
+.delete-post-btn:active {
+    transform: scale(0.95);
+}
+
 .post-img-container {
     width: 100%;
     aspect-ratio: 4/3;
