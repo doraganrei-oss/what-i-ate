@@ -424,6 +424,23 @@ body {
     border-color: var(--primary-color);
 }
 
+.delicious-btn.active {
+    background-color: #FFF9C4;
+    border-color: #F57F17;
+}
+
+.delicious-btn.active .delicious-label {
+    color: #F57F17;
+}
+
+.delicious-btn.active .delicious-count {
+    color: #F57F17;
+}
+
+.delicious-btn.active:hover {
+    background-color: #FFF59D;
+}
+
 .delicious-icon {
     font-size: 16px;
     transition: transform 0.2s;

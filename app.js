@@ -248,7 +248,8 @@ function initData() {
                         comment: data.comment || "",
                         image: data.image || "",
                         date: dateStr || new Date().toISOString().split('T')[0],
-                        deliciousCount: data.deliciousCount || 0
+                        deliciousUsers: data.deliciousUsers || [],
+                        deliciousCount: (data.deliciousUsers || []).length
                     });
                 });
                 
@@ -575,6 +576,12 @@ function renderFeed() {
             ? `<button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
             : '';
 
+        // Check if current user has liked this post
+        const hasLiked = db
+            ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
+            : (getLikedPostsLocal().includes(post.id));
+        const activeClass = hasLiked ? 'active' : '';
+
         card.innerHTML = `
             <div class="post-header">
                 <div class="post-user-info">
@@ -599,7 +606,7 @@ function renderFeed() {
                 <p class="post-comment">${post.comment}</p>
                 <div class="post-footer">
                     <div class="delicious-btn-wrapper">
-                        <button class="delicious-btn" onclick="handleDeliciousClick(this, '${post.id}', event)">
+                        <button class="delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
                             <span class="delicious-icon">🤤</span>
                             <span class="delicious-label">美味しそう！</span>
                             <span class="delicious-count">${post.deliciousCount || 0}</span>
@@ -736,7 +743,61 @@ function handleFormSubmit(e) {
 
 // --- "Delicious" Button Handler & Floating Particle Effect ---
 function handleDeliciousClick(button, postId, event) {
-    // Trigger emoji floating particles locally
+    event.stopPropagation();
+    
+    // Guest check - open login overlay if they try to like while logged out
+    if (db && !currentUser) {
+        loginOverlay.style.display = 'flex';
+        return;
+    }
+    
+    if (db) {
+        // Firebase mode
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const hasLiked = post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid);
+        
+        if (hasLiked) {
+            // Unlike
+            db.collection('meals').doc(postId).update({
+                deliciousUsers: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+            }).catch(err => console.error("Firestore unlike failed:", err));
+        } else {
+            // Like
+            db.collection('meals').doc(postId).update({
+                deliciousUsers: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+            }).then(() => {
+                // Trigger animation only when liking
+                triggerDeliciousParticles(button);
+            }).catch(err => console.error("Firestore like failed:", err));
+        }
+    } else {
+        // LocalStorage mode
+        let liked = getLikedPostsLocal();
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const likedIndex = liked.indexOf(postId);
+        if (likedIndex > -1) {
+            // Unlike locally
+            liked.splice(likedIndex, 1);
+            post.deliciousCount = Math.max(0, (post.deliciousCount || 0) - 1);
+        } else {
+            // Like locally
+            liked.push(postId);
+            post.deliciousCount = (post.deliciousCount || 0) + 1;
+            triggerDeliciousParticles(button);
+        }
+        
+        localStorage.setItem('what-i-ate-liked-local', JSON.stringify(liked));
+        localStorage.setItem('what-i-ate-posts', JSON.stringify(posts));
+        
+        renderFeed();
+    }
+}
+
+function triggerDeliciousParticles(button) {
     const emojis = ['🤤', '🍕', '🍰', '🥞', '🍔', '🍛', '🍳', '✨', '💛'];
     const buttonRect = button.getBoundingClientRect();
     
@@ -746,9 +807,8 @@ function handleDeliciousClick(button, postId, event) {
             particle.className = 'emoji-particle';
             particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
             
-            // Random horizontal offsets & rotation angles
-            const randomX = (Math.random() - 0.5) * 40; // -20px to 20px
-            const randomRot = (Math.random() - 0.5) * 60; // -30deg to 30deg
+            const randomX = (Math.random() - 0.5) * 40;
+            const randomRot = (Math.random() - 0.5) * 60;
             
             particle.style.left = `${buttonRect.left + buttonRect.width / 2 + randomX}px`;
             particle.style.top = `${buttonRect.top + window.scrollY - 10}px`;
@@ -756,32 +816,16 @@ function handleDeliciousClick(button, postId, event) {
             
             document.body.appendChild(particle);
             
-            // Remove after animation finishes
             particle.addEventListener('animationend', () => {
                 particle.remove();
             });
         }, i * 100);
     }
+}
 
-    if (db) {
-        // Firebase mode: Update in remote Firestore database (onSnapshot will refresh UI)
-        db.collection('meals').doc(postId).update({
-            deliciousCount: firebase.firestore.FieldValue.increment(1)
-        }).catch(err => {
-            console.error("Firestore update failed:", err);
-        });
-    } else {
-        // LocalStorage mode
-        const post = posts.find(p => p.id === postId);
-        if (!post) return;
-
-        post.deliciousCount = (post.deliciousCount || 0) + 1;
-        localStorage.setItem('what-i-ate-posts', JSON.stringify(posts));
-        
-        // Update counter text inside this card only
-        const countEl = button.querySelector('.delicious-count');
-        if (countEl) countEl.textContent = post.deliciousCount;
-    }
+function getLikedPostsLocal() {
+    const liked = localStorage.getItem('what-i-ate-liked-local');
+    return liked ? JSON.parse(liked) : [];
 }
 
 // --- Delete Post Handler ---
