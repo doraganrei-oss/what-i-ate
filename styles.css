@@ -1810,3 +1810,48 @@ body {
     border-color: var(--accent-color);
 }
 
+/* Likes (Favorites) Tab Styles */
+.likes-header {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.likes-subtitle {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+.likes-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    background-color: #FAF8F5;
+    border-radius: var(--radius-lg);
+    border: 2px dashed var(--border-color);
+    margin-top: 10px;
+}
+
+.empty-state-emoji {
+    font-size: 48px;
+    margin-bottom: 12px;
+    animation: bounce-slow 2s infinite alternate;
+}
+
+.likes-empty-state p {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.likes-empty-state .empty-state-sub {
+    font-size: 11px;
+    color: var(--text-light);
+    font-weight: 400;
+    margin-top: 6px;
+}
+

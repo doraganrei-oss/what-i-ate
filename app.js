@@ -119,24 +119,9 @@ const calendarDays = document.getElementById('calendarDays');
 const prevMonthBtn = document.getElementById('prevMonth');
 const nextMonthBtn = document.getElementById('nextMonth');
 
-// Stats Elements
-const selfCookedSegment = document.getElementById('selfCookedSegment');
-const selfCookedPercent = document.getElementById('selfCookedPercent');
-const countSelf = document.getElementById('countSelf');
-const countOut = document.getElementById('countOut');
-const countTakeout = document.getElementById('countTakeout');
-const countMorning = document.getElementById('countMorning');
-const countLunch = document.getElementById('countLunch');
-const countDinner = document.getElementById('countDinner');
-const countSnack = document.getElementById('countSnack');
-const fillMorning = document.getElementById('fillMorning');
-const fillLunch = document.getElementById('fillLunch');
-const fillDinner = document.getElementById('fillDinner');
-const fillSnack = document.getElementById('fillSnack');
-const avgRating = document.getElementById('avgRating');
-const avgStars = document.getElementById('avgStars');
-const statsComment = document.getElementById('statsComment');
 const streakCount = document.getElementById('streakCount');
+const likesGrid = document.getElementById('likesGrid');
+const likesEmptyState = document.getElementById('likesEmptyState');
 
 // Gacha Elements
 const gachaBtn = document.getElementById('gachaBtn');
@@ -262,7 +247,7 @@ function initData() {
                 const activeTabEl = document.querySelector('.nav-tab.active');
                 const activeTab = activeTabEl ? activeTabEl.dataset.tab : 'timeline';
                 if (activeTab === 'calendar') renderCalendar();
-                else if (activeTab === 'stats') updateStats();
+                else if (activeTab === 'likes') renderLikes();
                 updateStreak();
             }, (error) => {
                 console.error("Firestore onSnapshot error:", error);
@@ -292,7 +277,7 @@ function fallbackToLocalStorage() {
         localStorage.setItem('what-i-ate-posts', JSON.stringify(posts));
     }
     renderFeed();
-    updateStats();
+    renderLikes();
     updateStreak();
 }
 
@@ -334,8 +319,8 @@ function initEventListeners() {
             // Perform specific updates based on selected tab
             if (tab.dataset.tab === 'calendar') {
                 renderCalendar();
-            } else if (tab.dataset.tab === 'stats') {
-                updateStats();
+            } else if (tab.dataset.tab === 'likes') {
+                renderLikes();
             }
         });
     });
@@ -931,7 +916,7 @@ function handleDeletePostClick(postId, event) {
         posts = posts.filter(p => p.id !== postId);
         localStorage.setItem('what-i-ate-posts', JSON.stringify(posts));
         renderFeed();
-        updateStats();
+        renderLikes();
         updateStreak();
     }
 }
@@ -1061,59 +1046,85 @@ function renderCalendar() {
     }
 }
 
-// --- Stats calculation Logic ---
-function updateStats() {
-    const total = posts.length;
-    if (total === 0) return;
-
-    // 1. Self-cooked Ratio
-    const selfCount = posts.filter(p => p.category === 'self-cooked').length;
-    const outCount = posts.filter(p => p.category === 'eating-out').length;
-    const takeCount = posts.filter(p => p.category === 'takeout').length;
+// --- Render Favorites (Likes) Tab Logic ---
+function renderLikes() {
+    likesGrid.innerHTML = '';
     
-    countSelf.textContent = selfCount;
-    countOut.textContent = outCount;
-    countTakeout.textContent = takeCount;
-    
-    const selfRatio = Math.round((selfCount / total) * 100);
-    selfCookedPercent.textContent = `${selfRatio}%`;
-    
-    // Draw SVG circle segment
-    // Circle radius = 60, circumference = 2 * PI * 60 = ~377
-    const strokeDash = (selfRatio / 100) * 377;
-    selfCookedSegment.style.strokeDasharray = `${strokeDash} 377`;
-
-    // 2. Meal Type Distributions
-    const morningNum = posts.filter(p => p.mealType === 'morning').length;
-    const lunchNum = posts.filter(p => p.mealType === 'lunch').length;
-    const dinnerNum = posts.filter(p => p.mealType === 'dinner').length;
-    const snackNum = posts.filter(p => p.mealType === 'snack').length;
-    
-    countMorning.textContent = `${morningNum}回`;
-    countLunch.textContent = `${lunchNum}回`;
-    countDinner.textContent = `${dinnerNum}回`;
-    countSnack.textContent = `${snackNum}回`;
-    
-    const maxVal = Math.max(morningNum, lunchNum, dinnerNum, snackNum, 1);
-    fillMorning.style.width = `${(morningNum / maxVal) * 100}%`;
-    fillLunch.style.width = `${(lunchNum / maxVal) * 100}%`;
-    fillDinner.style.width = `${(dinnerNum / maxVal) * 100}%`;
-    fillSnack.style.width = `${(snackNum / maxVal) * 100}%`;
-
-    // 3. Satisfaction Score (Average rating)
-    const ratingSum = posts.reduce((sum, p) => sum + p.rating, 0);
-    const avg = (ratingSum / total).toFixed(1);
-    avgRating.textContent = avg;
-    avgStars.style.width = `${avg * 20}%`; // Avg out of 5 mapped to percent
-
-    // Dynamic advice text
-    if (avg >= 4.5) {
-        statsComment.textContent = "美味しいごはんに溢れていますね！素晴らしい毎日です！✨";
-    } else if (avg >= 3.5) {
-        statsComment.textContent = "バランスの良い豊かな食生活が送れていますね！🍎";
-    } else {
-        statsComment.textContent = "美味しかったメニューをお気に入りに登録して、楽しみを増やしましょう！🍙";
+    // Filter posts the user has liked
+    const likedPosts = db
+        ? posts.filter(p => currentUser && p.deliciousUsers && p.deliciousUsers.includes(currentUser.uid))
+        : posts.filter(p => getLikedPostsLocal().includes(p.id));
+        
+    if (likedPosts.length === 0) {
+        likesGrid.style.display = 'none';
+        likesEmptyState.style.display = 'flex';
+        return;
     }
+    
+    likesGrid.style.display = 'grid';
+    likesEmptyState.style.display = 'none';
+    
+    likedPosts.forEach(post => {
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        
+        // Stars HTML
+        const starsHtml = '★'.repeat(post.rating) + '☆'.repeat(5 - post.rating);
+        
+        // Check custom profile image
+        const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
+        const avatarHtml = isCustomImage 
+            ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
+            : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
+            
+        // Check ownership
+        const isOwner = db 
+            ? (currentUser && post.userId === currentUser.uid) 
+            : (post.username === 'あなた');
+            
+        const actionButtonsHtml = isOwner 
+            ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
+               <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
+            : '';
+            
+        const activeClass = 'active';
+        
+        card.innerHTML = `
+            <div class="post-header">
+                <div class="post-user-info">
+                    ${avatarHtml}
+                    <span class="post-username">${post.username}</span>
+                </div>
+                <div class="post-meta">
+                    <span class="post-time">${formatDate(post.date)}</span>
+                    <div class="post-badges">
+                        <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
+                        <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
+                        ${actionButtonsHtml}
+                    </div>
+                </div>
+            </div>
+            <div class="post-img-container" onclick="openDetailModal('${post.id}')">
+                <img src="${post.image}" class="post-img" alt="${post.dishName}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
+            </div>
+            <div class="post-body">
+                <div class="post-title-row">
+                    <h3 class="post-dish-name">${post.dishName}</h3>
+                    <div class="post-stars">${starsHtml}</div>
+                </div>
+                <p class="post-comment">${post.comment || 'メモはありません。'}</p>
+                <div class="post-actions">
+                    <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
+                        <span class="btn-emoji">🤤</span>
+                        <span class="btn-text">美味しそう！</span>
+                        <span class="delicious-count">${post.deliciousCount || 0}</span>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        likesGrid.appendChild(card);
+    });
 }
 
 // --- Active Posting Streak Calculation ---

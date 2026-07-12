@@ -50,9 +50,9 @@
                 <span class="nav-icon">📅</span>
                 <span class="nav-label">カレンダー</span>
             </button>
-            <button class="nav-tab" data-tab="stats">
-                <span class="nav-icon">📊</span>
-                <span class="nav-label">ごはん分析</span>
+            <button class="nav-tab" data-tab="likes">
+                <span class="nav-icon">💛</span>
+                <span class="nav-label">お気に入り</span>
             </button>
             <button class="nav-tab" data-tab="gacha">
                 <span class="nav-icon">🎰</span>
@@ -102,84 +102,22 @@
                 </div>
             </section>
 
-            <!-- Stats Section -->
-            <section id="tab-stats" class="tab-panel">
-                <h2>ごはん分析スタッツ</h2>
-                <p class="stats-subtitle">今週のあなたの食生活レポート</p>
-                
-                <div class="stats-grid">
-                    <!-- Stat Card: Self-Cooked Ratio -->
-                    <div class="stats-card">
-                        <h3>自炊バランス</h3>
-                        <div class="chart-container">
-                            <div class="donut-chart-wrapper">
-                                <svg width="160" height="160" viewBox="0 0 160 160" class="donut-chart" id="selfCookedChart">
-                                    <circle class="donut-hole" cx="80" cy="80" r="60" fill="transparent"></circle>
-                                    <circle class="donut-ring" cx="80" cy="80" r="60" fill="transparent" stroke-width="16"></circle>
-                                    <circle class="donut-segment" id="selfCookedSegment" cx="80" cy="80" r="60" fill="transparent" stroke-width="16" stroke-dasharray="0 100" stroke-dashoffset="25"></circle>
-                                </svg>
-                                <div class="donut-center-text">
-                                    <span class="donut-percentage" id="selfCookedPercent">0%</span>
-                                    <span class="donut-label">自炊率</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart-legend">
-                            <div class="legend-item"><span class="legend-color self-cooked"></span> 自炊 (<span id="countSelf">0</span>)</div>
-                            <div class="legend-item"><span class="legend-color eating-out"></span> 外食 (<span id="countOut">0</span>)</div>
-                            <div class="legend-item"><span class="legend-color takeout"></span> 中食/その他 (<span id="countTakeout">0</span>)</div>
-                        </div>
-                    </div>
-
-                    <!-- Stat Card: Meal Types -->
-                    <div class="stats-card">
-                        <h3>食事の分布</h3>
-                        <div class="bar-chart-container" id="mealDistribution">
-                            <div class="bar-row">
-                                <span class="bar-label">🌅 朝食</span>
-                                <div class="bar-track">
-                                    <div class="bar-fill morning" id="fillMorning" style="width: 0%"></div>
-                                </div>
-                                <span class="bar-count" id="countMorning">0回</span>
-                            </div>
-                            <div class="bar-row">
-                                <span class="bar-label">☀️ 昼食</span>
-                                <div class="bar-track">
-                                    <div class="bar-fill lunch" id="fillLunch" style="width: 0%"></div>
-                                </div>
-                                <span class="bar-count" id="countLunch">0回</span>
-                            </div>
-                            <div class="bar-row">
-                                <span class="bar-label">🌙 夕食</span>
-                                <div class="bar-track">
-                                    <div class="bar-fill dinner" id="fillDinner" style="width: 0%"></div>
-                                </div>
-                                <span class="bar-count" id="countDinner">0回</span>
-                            </div>
-                            <div class="bar-row">
-                                <span class="bar-label">☕ おやつ</span>
-                                <div class="bar-track">
-                                    <div class="bar-fill snack" id="fillSnack" style="width: 0%"></div>
-                                </div>
-                                <span class="bar-count" id="countSnack">0回</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stat Card: Satisfaction Index -->
-                    <div class="stats-card summary-card">
-                        <h3>食の満足度</h3>
-                        <div class="satisfaction-score">
-                            <span class="score-number" id="avgRating">0.0</span>
-                            <span class="score-max">/ 5.0</span>
-                        </div>
-                        <div class="stars-outer">
-                            <div class="stars-inner" id="avgStars" style="width: 0%"></div>
-                        </div>
-                        <p class="stats-comment" id="statsComment">たくさん記録して、食生活を振り返りましょう！</p>
-                    </div>
+            <!-- Likes Section -->
+            <section id="tab-likes" class="tab-panel">
+                <div class="likes-header">
+                    <h2>お気に入りのごはん</h2>
+                    <p class="likes-subtitle">「美味しそう！」した投稿がここに集まります</p>
+                </div>
+                <div class="feed-grid" id="likesGrid">
+                    <!-- Liked posts will be generated dynamically by JS -->
+                </div>
+                <div class="likes-empty-state" id="likesEmptyState" style="display: none;">
+                    <span class="empty-state-emoji">🍳</span>
+                    <p>お気に入りの投稿はまだありません。</p>
+                    <p class="empty-state-sub">タイムラインで「美味しそう！」ボタンを押してみましょう！</p>
                 </div>
             </section>
+
 
             <!-- Gacha Section -->
             <section id="tab-gacha" class="tab-panel">
@@ -410,6 +348,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=1.6"></script>
+    <script src="app.js?v=1.7"></script>
 </body>
 </html>
