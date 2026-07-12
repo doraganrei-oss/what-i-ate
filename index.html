@@ -25,10 +25,13 @@
             </div>
             <div class="header-right">
                 <div class="user-profile-header" id="userProfileHeader" style="display: none;">
-                    <img id="userHeaderAvatar" class="user-header-avatar" src="" alt="プロフ">
-                    <span id="userHeaderName" class="user-header-name">ゲスト</span>
-                    <button id="editProfileBtn" class="header-action-btn" title="プロフ編集">⚙️</button>
-                    <button id="logoutBtn" class="header-action-btn" title="ログアウト">🚪</button>
+                    <div id="userProfileActive" style="display: flex; align-items: center; gap: 8px;">
+                        <img id="userHeaderAvatar" class="user-header-avatar" src="" alt="プロフ">
+                        <span id="userHeaderName" class="user-header-name">ゲスト</span>
+                        <button id="editProfileBtn" class="header-action-btn" title="プロフ編集">⚙️</button>
+                        <button id="logoutBtn" class="header-action-btn" title="ログアウト">🚪</button>
+                    </div>
+                    <button id="headerLoginBtn" class="header-login-btn" style="display: none;">ログイン</button>
                 </div>
                 <div class="streak-badge" id="streakBadge" title="連続で投稿した日数">
                     <span class="streak-icon">🔥</span>
@@ -320,6 +323,7 @@
         <!-- Login Welcome Panel Overlay -->
         <div class="login-overlay" id="loginOverlay" style="display: none;">
             <div class="login-card">
+                <button class="close-btn" id="closeLoginBtn">&times;</button>
                 <span class="login-logo-emoji">🍳</span>
                 <h2>きょう何食べた？</h2>
                 <p class="login-tagline">毎日のごはんをみんなで記録・共有しよう！</p>

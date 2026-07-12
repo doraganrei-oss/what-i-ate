@@ -161,6 +161,8 @@ const userHeaderAvatar = document.getElementById('userHeaderAvatar');
 const userHeaderName = document.getElementById('userHeaderName');
 const editProfileBtn = document.getElementById('editProfileBtn');
 const logoutBtn = document.getElementById('logoutBtn');
+const closeLoginBtn = document.getElementById('closeLoginBtn');
+const headerLoginBtn = document.getElementById('headerLoginBtn');
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -182,6 +184,11 @@ function initData() {
                 if (user) {
                     currentUser = user;
                     loginOverlay.style.display = 'none';
+                    
+                    // Show active profile info, hide login button
+                    document.getElementById('userProfileActive').style.display = 'flex';
+                    headerLoginBtn.style.display = 'none';
+                    userProfileHeader.style.display = 'flex';
                     
                     // Fetch user custom profile from Firestore
                     try {
@@ -206,11 +213,17 @@ function initData() {
                 } else {
                     currentUser = null;
                     userProfile = { nickname: "ゲスト", avatar: "" };
-                    userProfileHeader.style.display = 'none';
-                    loginOverlay.style.display = 'flex';
                     
-                    // Hide FAB (+) button for guests
-                    openModalBtn.style.display = 'none';
+                    // Hide active profile info, show login button in header
+                    document.getElementById('userProfileActive').style.display = 'none';
+                    headerLoginBtn.style.display = 'block';
+                    userProfileHeader.style.display = 'flex';
+                    
+                    // Ensure login overlay is hidden initially for guests
+                    loginOverlay.style.display = 'none';
+                    
+                    // Show FAB (+) button (clicking it will open login prompt)
+                    openModalBtn.style.display = 'flex';
                 }
             });
             
@@ -334,11 +347,15 @@ function initEventListeners() {
 
     // Open & Close Create Modal
     openModalBtn.addEventListener('click', () => {
-        addMealModal.classList.add('active');
-        // Reset form
-        mealForm.reset();
-        imagePreview.style.display = 'none';
-        dropzoneText.style.display = 'block';
+        if (currentUser) {
+            addMealModal.classList.add('active');
+            // Reset form
+            mealForm.reset();
+            imagePreview.style.display = 'none';
+            dropzoneText.style.display = 'block';
+        } else {
+            loginOverlay.style.display = 'flex';
+        }
     });
 
     closeModalBtn.addEventListener('click', () => {
@@ -441,6 +458,16 @@ function initEventListeners() {
 
     // Profile Setup Submit
     profileForm.addEventListener('submit', handleProfileSubmit);
+
+    // Close Login Overlay
+    closeLoginBtn.addEventListener('click', () => {
+        loginOverlay.style.display = 'none';
+    });
+
+    // Header Login Button Click
+    headerLoginBtn.addEventListener('click', () => {
+        loginOverlay.style.display = 'flex';
+    });
 }
 
 function handleProfileFileSelect() {

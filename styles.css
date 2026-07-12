@@ -1442,6 +1442,7 @@ body {
 }
 
 .login-card {
+    position: relative;
     background-color: var(--bg-card);
     width: 90%;
     max-width: 400px;
@@ -1600,5 +1601,27 @@ body {
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(0,0,0,0.05);
+}
+
+.header-login-btn {
+    background-color: var(--primary-color);
+    color: #FFF;
+    border: none;
+    outline: none;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.header-login-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.header-login-btn:active {
+    transform: translateY(0);
 }
 
