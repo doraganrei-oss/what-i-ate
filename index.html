@@ -383,12 +383,23 @@
         </div>
     </div>
 
+    <!-- User List Modal (Followers / Following) -->
+    <div class="modal-overlay" id="userListModal" style="z-index: 11000;">
+        <div class="modal-content user-list-content">
+            <button class="close-btn" id="closeUserListModalBtn">&times;</button>
+            <h3 id="userListTitle" class="user-list-title">フォロワー</h3>
+            <div class="user-list-container" id="userListContainer">
+                <!-- Dynamically filled with user cards -->
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.0"></script>
+    <script src="app.js?v=2.1"></script>
 </body>
 </html>

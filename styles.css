@@ -2046,6 +2046,133 @@ body {
     background-color: #FFF8F6;
 }
 
+/* User List Modal (Followers/Following) Styles */
+.user-list-content {
+    width: 90%;
+    max-width: 400px;
+    max-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.user-list-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-main);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.user-list-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.user-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background-color: #FAF8F5;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.user-list-item:hover {
+    border-color: var(--accent-color);
+    background-color: #FFF8F6;
+    transform: translateY(-1px);
+}
+
+.user-list-avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #FFF;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.user-list-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.user-list-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.user-list-bio {
+    font-size: 10px;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+}
+
+.user-list-empty {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 12px;
+    padding: 40px 10px;
+}
+
+/* Clickable stats in home modal */
+.user-home-stats .stat-item {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.user-home-stats .stat-item:hover {
+    transform: scale(1.05);
+}
+
+.user-home-stats .stat-item:hover .stat-number {
+    color: var(--primary-color);
+}
+
+/* Animations & Particles */
+@keyframes follow-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.follow-btn.pop-animate {
+    animation: follow-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.heart-particle {
+    position: fixed;
+    pointer-events: none;
+    font-size: 16px;
+    z-index: 100000;
+    animation: heart-float 1s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes heart-float {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(1.2);
+        opacity: 0;
+    }
+}
+
 /* Mobile Responsiveness Rules */
 @media (max-width: 480px) {
     .app-content {

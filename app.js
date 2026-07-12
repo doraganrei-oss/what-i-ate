@@ -124,6 +124,12 @@ const userHomeFollowingCount = document.getElementById('userHomeFollowingCount')
 const userHomeFollowBtn = document.getElementById('userHomeFollowBtn');
 const userHomeGrid = document.getElementById('userHomeGrid');
 
+// User List Modal Elements
+const userListModal = document.getElementById('userListModal');
+const closeUserListModalBtn = document.getElementById('closeUserListModalBtn');
+const userListTitle = document.getElementById('userListTitle');
+const userListContainer = document.getElementById('userListContainer');
+
 // Calendar Elements
 const calendarTitle = document.getElementById('calendarTitle');
 const calendarDays = document.getElementById('calendarDays');
@@ -296,6 +302,12 @@ function updateUserProfileUI() {
     userHeaderName.textContent = userProfile.nickname || "名無し";
     userHeaderAvatar.src = userProfile.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFF0EC'/><text x='50' y='60' font-size='40' text-anchor='middle'>🥑</text></svg>";
     userProfileHeader.style.display = 'flex';
+    
+    // Make header details clickable to open My Home
+    userHeaderName.style.cursor = 'pointer';
+    userHeaderAvatar.style.cursor = 'pointer';
+    userHeaderName.onclick = () => { if (currentUser) openUserHome(currentUser.uid); };
+    userHeaderAvatar.onclick = () => { if (currentUser) openUserHome(currentUser.uid); };
 }
 
 function openProfileModalSetup() {
@@ -403,6 +415,16 @@ function initEventListeners() {
     userHomeModal.addEventListener('click', (e) => {
         if (e.target === userHomeModal) {
             userHomeModal.classList.remove('active');
+        }
+    });
+
+    // User List Modal Closing
+    closeUserListModalBtn.addEventListener('click', () => {
+        userListModal.classList.remove('active');
+    });
+    userListModal.addEventListener('click', (e) => {
+        if (e.target === userListModal) {
+            userListModal.classList.remove('active');
         }
     });
 
@@ -1020,7 +1042,7 @@ function openUserHome(targetUserId) {
     userHomeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-light);">読み込み中...</div>';
     userHomeModal.classList.add('active');
 
-    // Default Fallback details
+    // Default Fallbacks
     let profileName = "ゲスト";
     let profileAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFF0EC'/><text x='50' y='60' font-size='40' text-anchor='middle'>🥑</text></svg>";
     let profileBio = "自己紹介はありません。";
@@ -1029,116 +1051,17 @@ function openUserHome(targetUserId) {
 
     const isSelf = currentUser && targetUserId === currentUser.uid;
 
-    const applyUI = () => {
-        userHomeName.textContent = profileName;
-        userHomeAvatar.src = profileAvatar;
-        userHomeBio.textContent = profileBio;
-        userHomeFollowersCount.textContent = followers.length;
-        userHomeFollowingCount.textContent = following.length;
-
-        // Set Follow Button states
-        if (isSelf) {
-            userHomeFollowBtn.style.display = 'block';
-            userHomeFollowBtn.textContent = "プロフィール設定 ⚙️";
-            userHomeFollowBtn.className = "follow-btn edit-profile";
-            userHomeFollowBtn.onclick = () => {
-                userHomeModal.classList.remove('active');
-                openProfileModalSetup();
-            };
-        } else {
-            if (!currentUser) {
-                userHomeFollowBtn.style.display = 'none';
-            } else {
-                userHomeFollowBtn.style.display = 'block';
-                const isFollowing = followers.includes(currentUser.uid);
-                if (isFollowing) {
-                    userHomeFollowBtn.textContent = "フォロー中 ✓";
-                    userHomeFollowBtn.className = "follow-btn following";
-                } else {
-                    userHomeFollowBtn.textContent = "フォローする 👤+";
-                    userHomeFollowBtn.className = "follow-btn not-following";
-                }
-                userHomeFollowBtn.onclick = () => toggleFollowUser(targetUserId);
-            }
-        }
-
-        // Render target user's posts
-        const userPosts = posts.filter(p => p.userId === targetUserId);
-        userHomeGrid.innerHTML = '';
-        if (userPosts.length === 0) {
-            userHomeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 13px;">まだ投稿がありません。</div>';
-            return;
-        }
-
-        userPosts.forEach(post => {
-            const card = document.createElement('div');
-            card.className = 'post-card';
-            
-            const starsHtml = '★'.repeat(post.rating) + '☆'.repeat(5 - post.rating);
-            const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
-            const avatarHtml = isCustomImage 
-                ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
-                : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
-                
-            const isOwner = db 
-                ? (currentUser && post.userId === currentUser.uid) 
-                : (post.username === 'あなた');
-                
-            const actionButtonsHtml = isOwner 
-                ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
-                   <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
-                : '';
-
-            const hasLiked = db
-                ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
-                : (getLikedPostsLocal().includes(post.id));
-            const activeClass = hasLiked ? 'active' : '';
-
-            card.innerHTML = `
-                <div class="post-header">
-                    <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
-                        ${avatarHtml}
-                        <span class="post-username">${post.username}</span>
-                    </div>
-                    <div class="post-meta">
-                        <span class="post-time">${formatDate(post.date)}</span>
-                        <div class="post-badges">
-                            <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
-                            <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
-                            ${actionButtonsHtml}
-                        </div>
-                    </div>
-                </div>
-                <div class="post-img-container" onclick="openDetailModal('${post.id}')">
-                    <img src="${post.image}" class="post-img" alt="${post.dishName}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
-                </div>
-                <div class="post-body">
-                    <div class="post-title-row">
-                        <h3 class="post-dish-name">${post.dishName}</h3>
-                        <div class="post-stars">${starsHtml}</div>
-                    </div>
-                    <p class="post-comment">${post.comment || 'メモはありません。'}</p>
-                    <div class="post-actions">
-                        <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
-                            <span class="btn-emoji">🤤</span>
-                            <span class="btn-text">美味しそう！</span>
-                            <span class="delicious-count">${post.deliciousCount || 0}</span>
-                        </button>
-                    </div>
-                </div>
-            `;
-            userHomeGrid.appendChild(card);
-        });
-    };
-
     if (db) {
-        db.collection('users').doc(targetUserId).get().then(doc => {
-            if (doc.exists) {
-                const data = doc.data();
+        Promise.all([
+            db.collection('users').doc(targetUserId).get(),
+            db.collection('users').where('following', 'array-contains', targetUserId).get(),
+            currentUser ? db.collection('users').doc(currentUser.uid).get() : Promise.resolve(null)
+        ]).then(([targetDoc, followersSnap, selfDoc]) => {
+            if (targetDoc.exists) {
+                const data = targetDoc.data();
                 profileName = data.nickname || "匿名";
                 profileAvatar = data.avatar || profileAvatar;
                 profileBio = data.bio || "自己紹介はありません。";
-                followers = data.followers || [];
                 following = data.following || [];
             } else {
                 const userPost = posts.find(p => p.userId === targetUserId);
@@ -1148,10 +1071,52 @@ function openUserHome(targetUserId) {
                     profileBio = userPost.userBio || "自己紹介はありません。";
                 }
             }
-            applyUI();
+
+            followers = followersSnap.docs.map(doc => doc.id);
+
+            let isFollowing = false;
+            if (selfDoc && selfDoc.exists) {
+                const selfFollowing = selfDoc.data().following || [];
+                isFollowing = selfFollowing.includes(targetUserId);
+            }
+
+            userHomeName.textContent = profileName;
+            userHomeAvatar.src = profileAvatar;
+            userHomeBio.textContent = profileBio;
+            userHomeFollowersCount.textContent = followers.length;
+            userHomeFollowingCount.textContent = following.length;
+
+            const statsItems = document.querySelectorAll('.user-home-stats .stat-item');
+            statsItems[0].onclick = () => openUserList('followers', targetUserId, followers);
+            statsItems[1].onclick = () => openUserList('following', targetUserId, following);
+
+            if (isSelf) {
+                userHomeFollowBtn.style.display = 'block';
+                userHomeFollowBtn.textContent = "プロフィール設定 ⚙️";
+                userHomeFollowBtn.className = "follow-btn edit-profile";
+                userHomeFollowBtn.onclick = () => {
+                    userHomeModal.classList.remove('active');
+                    openProfileModalSetup();
+                };
+            } else {
+                if (!currentUser) {
+                    userHomeFollowBtn.style.display = 'none';
+                } else {
+                    userHomeFollowBtn.style.display = 'block';
+                    if (isFollowing) {
+                        userHomeFollowBtn.textContent = "フォロー中 ✓";
+                        userHomeFollowBtn.className = "follow-btn following";
+                    } else {
+                        userHomeFollowBtn.textContent = "フォローする 👤+";
+                        userHomeFollowBtn.className = "follow-btn not-following";
+                    }
+                    userHomeFollowBtn.onclick = () => toggleFollowUser(targetUserId, isFollowing);
+                }
+            }
+
+            renderUserHomePosts(targetUserId);
         }).catch(err => {
             console.error("Error loading user profile:", err);
-            applyUI();
         });
     } else {
         profileName = targetUserId === 'あなた' ? 'あなた' : targetUserId;
@@ -1159,62 +1124,222 @@ function openUserHome(targetUserId) {
         if (userPost) {
             profileAvatar = userPost.avatar || profileAvatar;
         }
-        applyUI();
+        userHomeName.textContent = profileName;
+        userHomeAvatar.src = profileAvatar;
+        userHomeBio.textContent = profileBio;
+        userHomeFollowersCount.textContent = 0;
+        userHomeFollowingCount.textContent = 0;
+        userHomeFollowBtn.style.display = 'none';
+        renderUserHomePosts(targetUserId);
     }
 }
 
-// --- Follow/Unfollow Handler ---
-function toggleFollowUser(targetUserId) {
+// --- Helper to Render Posts inside Home Grid ---
+function renderUserHomePosts(targetUserId) {
+    const userPosts = posts.filter(p => p.userId === targetUserId);
+    userHomeGrid.innerHTML = '';
+    if (userPosts.length === 0) {
+        userHomeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 13px;">まだ投稿がありません。</div>';
+        return;
+    }
+
+    userPosts.forEach(post => {
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        
+        const starsHtml = '★'.repeat(post.rating) + '☆'.repeat(5 - post.rating);
+        const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
+        const avatarHtml = isCustomImage 
+            ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
+            : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
+            
+        const isOwner = db 
+            ? (currentUser && post.userId === currentUser.uid) 
+            : (post.username === 'あなた');
+            
+        const actionButtonsHtml = isOwner 
+            ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
+               <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
+            : '';
+
+        const hasLiked = db
+            ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
+            : (getLikedPostsLocal().includes(post.id));
+        const activeClass = hasLiked ? 'active' : '';
+
+        card.innerHTML = `
+            <div class="post-header">
+                <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
+                    ${avatarHtml}
+                    <span class="post-username">${post.username}</span>
+                </div>
+                <div class="post-meta">
+                    <span class="post-time">${formatDate(post.date)}</span>
+                    <div class="post-badges">
+                        <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
+                        <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
+                        ${actionButtonsHtml}
+                    </div>
+                </div>
+            </div>
+            <div class="post-img-container" onclick="openDetailModal('${post.id}')">
+                <img src="${post.image}" class="post-img" alt="${post.dishName}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
+            </div>
+            <div class="post-body">
+                <div class="post-title-row">
+                    <h3 class="post-dish-name">${post.dishName}</h3>
+                    <div class="post-stars">${starsHtml}</div>
+                </div>
+                <p class="post-comment">${post.comment || 'メモはありません。'}</p>
+                <div class="post-actions">
+                    <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
+                        <span class="btn-emoji">🤤</span>
+                        <span class="btn-text">美味しそう！</span>
+                        <span class="delicious-count">${post.deliciousCount || 0}</span>
+                    </button>
+                </div>
+            </div>
+        `;
+        userHomeGrid.appendChild(card);
+    });
+}
+
+// --- Follow/Unfollow Handler (Optimistic UI + flying hearts) ---
+function toggleFollowUser(targetUserId, currentlyFollowing) {
     if (!db || !currentUser || targetUserId === currentUser.uid) return;
 
-    db.collection('users').doc(targetUserId).get().then(doc => {
+    userHomeFollowBtn.classList.remove('pop-animate');
+    void userHomeFollowBtn.offsetWidth;
+    userHomeFollowBtn.classList.add('pop-animate');
+
+    if (currentlyFollowing) {
+        userHomeFollowBtn.textContent = "フォローする 👤+";
+        userHomeFollowBtn.className = "follow-btn not-following pop-animate";
+        userHomeFollowersCount.textContent = Math.max(0, parseInt(userHomeFollowersCount.textContent) - 1);
+    } else {
+        userHomeFollowBtn.textContent = "フォロー中 ✓";
+        userHomeFollowBtn.className = "follow-btn following pop-animate";
+        userHomeFollowersCount.textContent = parseInt(userHomeFollowersCount.textContent) + 1;
+        
+        createFollowHeartParticles(userHomeFollowBtn);
+    }
+
+    db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (!doc.exists) {
-            const userPost = posts.find(p => p.userId === targetUserId);
-            return db.collection('users').doc(targetUserId).set({
-                nickname: userPost ? userPost.username : "匿名",
-                avatar: userPost ? userPost.avatar : "",
-                bio: userPost ? userPost.userBio : "",
-                followers: [],
+            return db.collection('users').doc(currentUser.uid).set({
+                nickname: userProfile.nickname || "名無し",
+                avatar: userProfile.avatar || "",
+                bio: userProfile.bio || "",
                 following: []
             });
         }
+        return doc;
     }).then(() => {
-        return Promise.all([
-            db.collection('users').doc(currentUser.uid).get(),
-            db.collection('users').doc(targetUserId).get()
-        ]);
-    }).then(([selfDoc, targetDoc]) => {
-        const selfData = selfDoc.exists ? selfDoc.data() : { following: [], followers: [] };
-        const targetData = targetDoc.data();
-
-        const selfFollowing = selfData.following || [];
-        const targetFollowers = targetDoc.exists ? (targetData.followers || []) : [];
-
-        const isFollowing = targetFollowers.includes(currentUser.uid);
-
-        let updateSelf, updateTarget;
-        if (isFollowing) {
-            updateSelf = db.collection('users').doc(currentUser.uid).update({
+        const ref = db.collection('users').doc(currentUser.uid);
+        if (currentlyFollowing) {
+            return ref.update({
                 following: firebase.firestore.FieldValue.arrayRemove(targetUserId)
             });
-            updateTarget = db.collection('users').doc(targetUserId).update({
-                followers: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
-            });
         } else {
-            updateSelf = db.collection('users').doc(currentUser.uid).set({
+            return ref.update({
                 following: firebase.firestore.FieldValue.arrayUnion(targetUserId)
-            }, { merge: true });
-            updateTarget = db.collection('users').doc(targetUserId).update({
-                followers: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
             });
         }
-
-        return Promise.all([updateSelf, updateTarget]);
     }).then(() => {
-        openUserHome(targetUserId);
+        setTimeout(() => {
+            openUserHome(targetUserId);
+        }, 400);
     }).catch(err => {
-        console.error("Failed to follow/unfollow user:", err);
+        console.error("Failed to update follow status:", err);
+        alert("フォロー処理に失敗しました。");
+        openUserHome(targetUserId);
     });
+}
+
+// --- Followers / Following List Popup Logic ---
+function openUserList(type, targetUserId, userIdsArray) {
+    if (!db || !userIdsArray || userIdsArray.length === 0) {
+        userListTitle.textContent = type === 'followers' ? 'フォロワー (0)' : 'フォロー中 (0)';
+        userListContainer.innerHTML = '<div class="user-list-empty">表示するユーザーがいません。</div>';
+        userListModal.classList.add('active');
+        return;
+    }
+
+    userListTitle.textContent = type === 'followers' ? `フォロワー (${userIdsArray.length})` : `フォロー中 (${userIdsArray.length})`;
+    userListContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light);">読み込み中...</div>';
+    userListModal.classList.add('active');
+
+    const limitedIds = userIdsArray.slice(0, 30);
+
+    db.collection('users').where(firebase.firestore.FieldPath.documentId(), 'in', limitedIds).get().then(snap => {
+        userListContainer.innerHTML = '';
+        if (snap.empty) {
+            userListContainer.innerHTML = '<div class="user-list-empty">表示するユーザーがいません。</div>';
+            return;
+        }
+
+        snap.docs.forEach(doc => {
+            const data = doc.data();
+            const uid = doc.id;
+            const nickname = data.nickname || "匿名";
+            const bio = data.bio || "自己紹介はありません。";
+            
+            const isCustomImage = data.avatar && (data.avatar.startsWith('data:image/') || data.avatar.startsWith('http'));
+            const avatarSrc = isCustomImage ? data.avatar : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFF0EC'/><text x='50' y='60' font-size='40' text-anchor='middle'>🥑</text></svg>";
+
+            const item = document.createElement('div');
+            item.className = 'user-list-item';
+            item.innerHTML = `
+                <img src="${avatarSrc}" class="user-list-avatar-img" alt="アバター">
+                <div class="user-list-info">
+                    <span class="user-list-name">${nickname}</span>
+                    <span class="user-list-bio">${bio}</span>
+                </div>
+            `;
+
+            item.onclick = () => {
+                userListModal.classList.remove('active');
+                openUserHome(uid);
+            };
+
+            userListContainer.appendChild(item);
+        });
+    }).catch(err => {
+        console.error("Error loading user list:", err);
+        userListContainer.innerHTML = '<div class="user-list-empty">読み込みに失敗しました。</div>';
+    });
+}
+
+// --- Spawn Floating Hearts Micro-Animation ---
+function createFollowHeartParticles(element) {
+    const rect = element.getBoundingClientRect();
+    const btnCenterX = rect.left + rect.width / 2;
+    const btnCenterY = rect.top + rect.height / 2;
+
+    const emojis = ['🧡', '💛', '✨', '💖', '🥰'];
+
+    for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'heart-particle';
+        particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+        particle.style.left = `${btnCenterX - 8 + (Math.random() - 0.5) * 20}px`;
+        particle.style.top = `${btnCenterY - 8 + (Math.random() - 0.5) * 10}px`;
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 40 + Math.random() * 50;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance - 20;
+
+        particle.style.setProperty('--tx', `${tx}px`);
+        particle.style.setProperty('--ty', `${ty}px`);
+
+        document.body.appendChild(particle);
+
+        particle.addEventListener('animationend', () => {
+            particle.remove();
+        });
+    }
 }
 
 // --- Calendar Rendering Logic ---
