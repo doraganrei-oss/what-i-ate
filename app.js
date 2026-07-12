@@ -1162,6 +1162,7 @@ function updateStreak() {
 }
 
 // --- Spin Gacha Action ---
+// --- Spin Gacha Action ---
 function spinGacha() {
     // Prevent double clicking
     if (gachaLever.classList.contains('pulled')) return;
@@ -1179,19 +1180,49 @@ function spinGacha() {
     rollingText.textContent = "🍔 🍜 🍳 🍱 🥞 🍣 🍛";
     gachaScreenContent.appendChild(rollingText);
     
-    // Choose random menu item
-    const selectedMeal = GACHA_DB[Math.floor(Math.random() * GACHA_DB.length)];
+    // Try to filter other people's posts
+    let candidatePosts = posts.filter(p => p.userId && p.userId !== currentUser?.uid);
+    let usingRealPosts = true;
+    
+    // Fallback 1: If no other users, use all posts (including own)
+    if (candidatePosts.length === 0) {
+        candidatePosts = posts;
+    }
+    // Fallback 2: If still no posts at all in DB, use static GACHA_DB
+    if (candidatePosts.length === 0) {
+        candidatePosts = GACHA_DB;
+        usingRealPosts = false;
+    }
+
+    // Choose random candidate item
+    const selectedItem = candidatePosts[Math.floor(Math.random() * candidatePosts.length)];
 
     setTimeout(() => {
         // Reset lever
         gachaLever.classList.remove('pulled');
         
-        // Show result on gacha screen
-        gachaScreenContent.innerHTML = `<span style="font-size: 36px;">${selectedMeal.emoji}</span>`;
+        if (usingRealPosts) {
+            // Show real post image on gacha screen
+            gachaScreenContent.innerHTML = `<img src="${selectedItem.image}" alt="${selectedItem.dishName}" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 3px solid #FFC045; box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">`;
+            
+            // Show result details
+            gachaResultTitle.textContent = selectedItem.dishName;
+            
+            const stars = '★'.repeat(selectedItem.rating) + '☆'.repeat(5 - selectedItem.rating);
+            gachaResultDesc.innerHTML = `
+                <div style="font-weight:700; color:var(--text-main); margin-bottom:4px;">「${selectedItem.username}」さんのご飯です！</div>
+                <div style="color:var(--secondary-color); font-size:12px; margin-bottom:8px;">${stars}</div>
+                <div style="font-style:italic; font-size:11px; color:var(--text-light);">「${selectedItem.comment || '（メモなし）'}」</div>
+            `;
+        } else {
+            // Show mock emoji on gacha screen
+            gachaScreenContent.innerHTML = `<span style="font-size: 36px; animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">${selectedItem.emoji}</span>`;
+            
+            // Show mock result details
+            gachaResultTitle.textContent = selectedItem.title;
+            gachaResultDesc.textContent = selectedItem.desc;
+        }
         
-        // Show detail result card
-        gachaResultTitle.textContent = selectedMeal.title;
-        gachaResultDesc.textContent = selectedMeal.desc;
         gachaResultCard.style.display = 'block';
     }, 1500); // Roll for 1.5 seconds
 }
