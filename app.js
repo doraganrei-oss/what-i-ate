@@ -84,6 +84,7 @@ let currentFilter = 'all';
 let calendarDate = new Date();
 let currentUser = null;
 let userProfile = { nickname: "ゲスト", avatar: "" };
+let editingPostId = null;
 
 // --- DOM Elements ---
 const feedGrid = document.getElementById('feedGrid');
@@ -349,6 +350,9 @@ function initEventListeners() {
     // Open & Close Create Modal
     openModalBtn.addEventListener('click', () => {
         if (currentUser) {
+            editingPostId = null;
+            addMealModal.querySelector('.modal-header h2').textContent = "ごはんを記録する";
+            mealForm.querySelector('.submit-btn').textContent = "記録する！ 🎉";
             addMealModal.classList.add('active');
             // Reset form
             mealForm.reset();
@@ -567,13 +571,14 @@ function renderFeed() {
             ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
             : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
 
-        // Check ownership for delete permission
+        // Check ownership for delete/edit permission
         const isOwner = db 
             ? (currentUser && post.userId === currentUser.uid) 
             : (post.username === 'あなた');
         
-        const deleteButtonHtml = isOwner 
-            ? `<button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
+        const actionButtonsHtml = isOwner 
+            ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
+               <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
             : '';
 
         // Check if current user has liked this post
@@ -593,7 +598,7 @@ function renderFeed() {
                     <div class="post-badges">
                         <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
                         <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
-                        ${deleteButtonHtml}
+                        ${actionButtonsHtml}
                     </div>
                 </div>
             </div>
@@ -683,6 +688,40 @@ function handleFormSubmit(e) {
         else if (mealType === 'lunch') mealImage = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?w=500&auto=format&fit=crop&q=60";
         else if (mealType === 'dinner') mealImage = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop&q=60";
         else mealImage = "https://images.unsplash.com/photo-1511018556340-d16986a1c194?w=500&auto=format&fit=crop&q=60";
+    }
+
+    if (editingPostId) {
+        if (db) {
+            db.collection('meals').doc(editingPostId).update({
+                dishName: dishName,
+                mealType: mealType,
+                category: mealCategory,
+                rating: rating,
+                comment: comment,
+                image: mealImage
+            }).then(() => {
+                addMealModal.classList.remove('active');
+                editingPostId = null;
+            }).catch(err => {
+                console.error("Firebase update error:", err);
+                alert("更新に失敗しました。");
+            });
+        } else {
+            const post = posts.find(p => p.id === editingPostId);
+            if (post) {
+                post.dishName = dishName;
+                post.mealType = mealType;
+                post.category = mealCategory;
+                post.rating = rating;
+                post.comment = comment;
+                post.image = mealImage;
+            }
+            localStorage.setItem('what-i-ate-posts', JSON.stringify(posts));
+            addMealModal.classList.remove('active');
+            editingPostId = null;
+            renderFeed();
+        }
+        return;
     }
 
     const newPost = {
@@ -845,6 +884,39 @@ function handleDeletePostClick(postId, event) {
         updateStats();
         updateStreak();
     }
+}
+
+// --- Edit Post Handler ---
+function handleEditPostClick(postId, event) {
+    event.stopPropagation(); // Detailモーダルが開くのを防ぐ
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+    
+    editingPostId = postId;
+    
+    // Formに既存データを流し込む
+    document.getElementById('dishName').value = post.dishName;
+    document.getElementById('mealType').value = post.mealType;
+    document.getElementById('mealCategory').value = post.category;
+    document.getElementById('comment').value = post.comment;
+    
+    // 星評価ラジオボタンを設定
+    const starRadios = document.getElementsByName('rating');
+    for (let radio of starRadios) {
+        radio.checked = (parseInt(radio.value) === post.rating);
+    }
+    
+    // 画像プレビューを設定
+    imagePreview.src = post.image;
+    imagePreview.style.display = 'block';
+    dropzoneText.style.display = 'none';
+    
+    // モーダルのヘッダーとサブミットボタンを「編集モード」に変更
+    addMealModal.querySelector('.modal-header h2').textContent = "ごはん記録を編集";
+    mealForm.querySelector('.submit-btn').textContent = "更新する！ ✨";
+    
+    // モーダルを開く
+    addMealModal.classList.add('active');
 }
 
 // --- Detail View Dialog ---
