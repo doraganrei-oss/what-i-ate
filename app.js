@@ -1023,18 +1023,18 @@ function renderCalendar() {
         const dayMeals = posts.filter(post => post.date === dateStr);
         
         if (dayMeals.length > 0) {
-            const indicator = document.createElement('div');
-            indicator.className = 'day-indicator';
-            
-            // Show thumbnail for the first meal of the day
+            cell.classList.add('has-meal');
             const meal = dayMeals[0];
             if (meal.image) {
-                indicator.innerHTML = `<img src="${meal.image}" alt="${meal.dishName}" class="day-thumb">`;
-            } else {
-                indicator.innerHTML = `<span class="day-emoji">${getMealTypeEmoji(meal.mealType)}</span>`;
+                cell.style.backgroundImage = `url('${meal.image}')`;
             }
             
-            cell.appendChild(indicator);
+            if (dayMeals.length > 1) {
+                const countBadge = document.createElement('span');
+                countBadge.className = 'day-meal-count-badge';
+                countBadge.textContent = `+${dayMeals.length - 1}`;
+                cell.appendChild(countBadge);
+            }
             
             // Click to open details
             cell.addEventListener('click', () => {

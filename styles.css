@@ -878,25 +878,55 @@ body {
     visibility: hidden;
 }
 
-.day-indicator {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2px;
-    width: 100%;
+.calendar-day.has-meal {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
 }
 
-.day-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #FFF;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.calendar-day.has-meal::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s;
+    z-index: 1;
 }
 
-.day-emoji {
-    font-size: 10px;
+.calendar-day.has-meal:hover::after {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.calendar-day.has-meal .day-number {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-size: 9px;
+    color: var(--text-main);
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    z-index: 2;
+}
+
+.day-meal-count-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background-color: var(--primary-color);
+    color: #FFF;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.20);
+    z-index: 2;
 }
 
 /* Stats Section Styling */
@@ -1853,5 +1883,40 @@ body {
     color: var(--text-light);
     font-weight: 400;
     margin-top: 6px;
+}
+
+/* Mobile Responsiveness Rules */
+@media (max-width: 480px) {
+    .app-content {
+        padding: 12px;
+    }
+    .calendar-container {
+        padding: 12px;
+    }
+    .calendar-days {
+        gap: 4px;
+    }
+    .calendar-day {
+        padding: 2px;
+        border-radius: 6px;
+    }
+    .weekday {
+        font-size: 10px;
+    }
+    .day-number {
+        font-size: 9px;
+    }
+    .calendar-day.has-meal .day-number {
+        font-size: 8px;
+        padding: 0px 3px;
+        top: 2px;
+        left: 2px;
+    }
+    .day-meal-count-badge {
+        font-size: 8px;
+        padding: 0px 3px;
+        bottom: 2px;
+        right: 2px;
+    }
 }
 
