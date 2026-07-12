@@ -82,6 +82,8 @@ const DEFAULT_POSTS = [
 let posts = [];
 let currentFilter = 'all';
 let calendarDate = new Date();
+let currentUser = null;
+let userProfile = { nickname: "ゲスト", avatar: "" };
 
 // --- DOM Elements ---
 const feedGrid = document.getElementById('feedGrid');
@@ -145,12 +147,25 @@ const gachaResultDesc = document.getElementById('gachaResultDesc');
 const gachaAcceptBtn = document.getElementById('gachaAcceptBtn');
 const gachaRetryBtn = document.getElementById('gachaRetryBtn');
 
+// Authentication & Profile Elements
+const loginOverlay = document.getElementById('loginOverlay');
+const loginGoogleBtn = document.getElementById('loginGoogleBtn');
+const profileModal = document.getElementById('profileModal');
+const profileForm = document.getElementById('profileForm');
+const profileImageFile = document.getElementById('profileImageFile');
+const profileImagePreview = document.getElementById('profileImagePreview');
+const profileDropzone = document.getElementById('profileDropzone');
+const profileDropzoneText = document.getElementById('profileDropzoneText');
+const userProfileHeader = document.getElementById('userProfileHeader');
+const userHeaderAvatar = document.getElementById('userHeaderAvatar');
+const userHeaderName = document.getElementById('userHeaderName');
+const editProfileBtn = document.getElementById('editProfileBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     initData();
     initEventListeners();
-    // For LocalStorage mode, fallbackToLocalStorage() will handle rendering.
-    // For Firebase mode, the Firestore onSnapshot listener will handle rendering.
 });
 
 // Load posts from LocalStorage or Firebase
@@ -162,7 +177,44 @@ function initData() {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             
-            // Set up real-time listener for shared data
+            // Listen to auth state changes
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    loginOverlay.style.display = 'none';
+                    
+                    // Fetch user custom profile from Firestore
+                    try {
+                        const userDoc = await db.collection('users').doc(user.uid).get();
+                        if (userDoc.exists) {
+                            userProfile = userDoc.data();
+                            updateUserProfileUI();
+                        } else {
+                            // First time login - trigger profile modal setup
+                            userProfile = { nickname: "", avatar: "" };
+                            openProfileModalSetup();
+                        }
+                    } catch (err) {
+                        console.error("Error fetching user profile:", err);
+                        // Fallback user details
+                        userProfile = { nickname: user.displayName || "匿名ユーザー", avatar: user.photoURL || "" };
+                        updateUserProfileUI();
+                    }
+                    
+                    // Show FAB (+) button since user is logged in
+                    openModalBtn.style.display = 'flex';
+                } else {
+                    currentUser = null;
+                    userProfile = { nickname: "ゲスト", avatar: "" };
+                    userProfileHeader.style.display = 'none';
+                    loginOverlay.style.display = 'flex';
+                    
+                    // Hide FAB (+) button for guests
+                    openModalBtn.style.display = 'none';
+                }
+            });
+            
+            // Set up real-time listener for shared meal data (guests can read too!)
             db.collection('meals').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
                 posts = [];
                 snapshot.forEach((doc) => {
@@ -173,7 +225,8 @@ function initData() {
                     }
                     posts.push({
                         id: doc.id,
-                        username: data.username || "あなた",
+                        userId: data.userId || "",
+                        username: data.username || "匿名",
                         avatar: data.avatar || "🥑",
                         dishName: data.dishName || "",
                         mealType: data.mealType || "lunch",
@@ -209,6 +262,11 @@ function initData() {
 
 function fallbackToLocalStorage() {
     db = null;
+    currentUser = null;
+    loginOverlay.style.display = 'none';
+    userProfileHeader.style.display = 'none';
+    openModalBtn.style.display = 'flex'; // Enable FAB in local mode
+    
     const savedPosts = localStorage.getItem('what-i-ate-posts');
     if (savedPosts) {
         posts = JSON.parse(savedPosts);
@@ -219,6 +277,25 @@ function fallbackToLocalStorage() {
     renderFeed();
     updateStats();
     updateStreak();
+}
+
+function updateUserProfileUI() {
+    userHeaderName.textContent = userProfile.nickname || "名無し";
+    userHeaderAvatar.src = userProfile.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFF0EC'/><text x='50' y='60' font-size='40' text-anchor='middle'>🥑</text></svg>";
+    userProfileHeader.style.display = 'flex';
+}
+
+function openProfileModalSetup() {
+    profileModal.classList.add('active');
+    document.getElementById('profileNickname').value = userProfile.nickname || "";
+    if (userProfile.avatar) {
+        profileImagePreview.src = userProfile.avatar;
+        profileImagePreview.style.display = 'block';
+        profileDropzoneText.style.display = 'none';
+    } else {
+        profileImagePreview.style.display = 'none';
+        profileDropzoneText.style.display = 'block';
+    }
 }
 
 
@@ -320,6 +397,114 @@ function initEventListeners() {
         document.getElementById('dishName').value = selected;
     });
     gachaRetryBtn.addEventListener('click', spinGacha);
+
+    // --- Authentication Event Listeners ---
+    
+    // Google Sign-In Click
+    loginGoogleBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider).catch(err => {
+            console.error("Google login failed:", err);
+            alert("ログインに失敗しました。");
+        });
+    });
+
+    // Logout Click
+    logoutBtn.addEventListener('click', () => {
+        if (confirm("ログアウトしますか？")) {
+            firebase.auth().signOut().catch(err => console.error("Logout failed:", err));
+        }
+    });
+
+    // Edit Profile Click
+    editProfileBtn.addEventListener('click', openProfileModalSetup);
+
+    // Profile Modal File Selection
+    profileDropzone.addEventListener('click', () => profileImageFile.click());
+    profileImageFile.addEventListener('change', handleProfileFileSelect);
+    
+    profileDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        profileDropzone.style.borderColor = 'var(--primary-color)';
+    });
+    profileDropzone.addEventListener('dragleave', () => {
+        profileDropzone.style.borderColor = '#DCD4D0';
+    });
+    profileDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        profileDropzone.style.borderColor = '#DCD4D0';
+        if (e.dataTransfer.files.length > 0) {
+            profileImageFile.files = e.dataTransfer.files;
+            handleProfileFileSelect();
+        }
+    });
+
+    // Profile Setup Submit
+    profileForm.addEventListener('submit', handleProfileSubmit);
+}
+
+function handleProfileFileSelect() {
+    const file = profileImageFile.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const SIZE = 120; // Profile thumbnail size 120x120px
+                canvas.width = SIZE;
+                canvas.height = SIZE;
+                const ctx = canvas.getContext('2d');
+                
+                // Crop to center square
+                let srcX = 0;
+                let srcY = 0;
+                let srcSize = Math.min(img.width, img.height);
+                
+                if (img.width > img.height) {
+                    srcX = (img.width - img.height) / 2;
+                } else {
+                    srcY = (img.height - img.width) / 2;
+                }
+                
+                ctx.drawImage(img, srcX, srcY, srcSize, srcSize, 0, 0, SIZE, SIZE);
+                
+                // Compress to JPEG with 0.8 quality (extremely light base64 string)
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                profileImagePreview.src = compressedDataUrl;
+                profileImagePreview.style.display = 'block';
+                profileDropzoneText.style.display = 'none';
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function handleProfileSubmit(e) {
+    e.preventDefault();
+    const nickname = document.getElementById('profileNickname').value.trim();
+    if (!nickname) return;
+    
+    const avatar = profileImagePreview.style.display !== 'none' ? profileImagePreview.src : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FFF0EC'/><text x='50' y='60' font-size='40' text-anchor='middle'>🥑</text></svg>";
+    
+    if (db && currentUser) {
+        db.collection('users').doc(currentUser.uid).set({
+            nickname: nickname,
+            avatar: avatar,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            userProfile = { nickname, avatar };
+            profileModal.classList.remove('active');
+            updateUserProfileUI();
+            
+            // Refresh feed timeline
+            renderFeed();
+        }).catch(err => {
+            console.error("Profile save error:", err);
+            alert("プロフィールの保存に失敗しました。");
+        });
+    }
 }
 
 // --- Render Timeline Feed ---
@@ -344,10 +529,26 @@ function renderFeed() {
     filteredPosts.forEach(post => {
         const card = document.createElement('article');
         card.className = 'post-card';
+        
+        // Handle emoji vs custom image avatar dynamically
+        const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
+        const avatarHtml = isCustomImage 
+            ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
+            : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
+
+        // Check ownership for delete permission
+        const isOwner = db 
+            ? (currentUser && post.userId === currentUser.uid) 
+            : (post.username === 'あなた');
+        
+        const deleteButtonHtml = isOwner 
+            ? `<button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
+            : '';
+
         card.innerHTML = `
             <div class="post-header">
                 <div class="post-user-info">
-                    <div class="post-avatar">${post.avatar || '🍴'}</div>
+                    ${avatarHtml}
                     <span class="post-username">${post.username}</span>
                 </div>
                 <div class="post-meta">
@@ -355,7 +556,7 @@ function renderFeed() {
                     <div class="post-badges">
                         <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
                         <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
-                        ${post.username === 'あなた' ? `<button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` : ''}
+                        ${deleteButtonHtml}
                     </div>
                 </div>
             </div>
@@ -448,8 +649,8 @@ function handleFormSubmit(e) {
     }
 
     const newPost = {
-        username: "あなた",
-        avatar: "🥑",
+        username: userProfile.nickname || "匿名",
+        avatar: userProfile.avatar || "🥑",
         dishName: dishName,
         mealType: mealType,
         category: mealCategory,
@@ -463,6 +664,7 @@ function handleFormSubmit(e) {
         // Firebase database mode
         db.collection('meals').add({
             ...newPost,
+            userId: currentUser ? currentUser.uid : "",
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
             addMealModal.classList.remove('active');

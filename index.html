@@ -23,7 +23,13 @@
                     <p>Everyday Food Log</p>
                 </div>
             </div>
-            <div class="header-stats">
+            <div class="header-right">
+                <div class="user-profile-header" id="userProfileHeader" style="display: none;">
+                    <img id="userHeaderAvatar" class="user-header-avatar" src="" alt="プロフ">
+                    <span id="userHeaderName" class="user-header-name">ゲスト</span>
+                    <button id="editProfileBtn" class="header-action-btn" title="プロフ編集">⚙️</button>
+                    <button id="logoutBtn" class="header-action-btn" title="ログアウト">🚪</button>
+                </div>
                 <div class="streak-badge" id="streakBadge" title="連続で投稿した日数">
                     <span class="streak-icon">🔥</span>
                     <span class="streak-count" id="streakCount">0</span>日連続
@@ -310,11 +316,58 @@
                 </div>
             </div>
         </div>
+
+        <!-- Login Welcome Panel Overlay -->
+        <div class="login-overlay" id="loginOverlay" style="display: none;">
+            <div class="login-card">
+                <span class="login-logo-emoji">🍳</span>
+                <h2>きょう何食べた？</h2>
+                <p class="login-tagline">毎日のごはんをみんなで記録・共有しよう！</p>
+                <button class="login-google-btn" id="loginGoogleBtn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="google-logo">
+                    <span>Googleアカウントでログイン</span>
+                </button>
+                <p class="login-footer-text">ログインすると、自分の食事の記録、他の人とのリアルタイム共有、投稿の削除ができます。</p>
+            </div>
+        </div>
+
+        <!-- Profile Setup Modal -->
+        <div class="modal-overlay" id="profileModal">
+            <div class="modal-content profile-setup-content">
+                <div class="modal-header">
+                    <h2>プロフィール設定</h2>
+                </div>
+                <form id="profileForm" class="profile-form">
+                    <!-- Profile Photo Crop/Upload -->
+                    <div class="form-group profile-upload-group">
+                        <label>プロフィール写真</label>
+                        <div class="profile-dropzone" id="profileDropzone">
+                            <input type="file" id="profileImageFile" accept="image/*" class="file-input">
+                            <div class="profile-dropzone-text" id="profileDropzoneText">
+                                <span class="profile-dropzone-icon">👤</span>
+                                <p>写真を選択</p>
+                            </div>
+                            <img id="profileImagePreview" class="profile-image-preview" src="" alt="プレビュー" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Nickname -->
+                    <div class="form-group">
+                        <label for="profileNickname">ニックネーム <span class="required">*</span></label>
+                        <input type="text" id="profileNickname" required placeholder="例：たべっ子、rei" maxlength="15">
+                    </div>
+
+                    <!-- Submit Profile -->
+                    <button type="submit" class="submit-btn" id="saveProfileBtn">設定を保存する ✨</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
     <script src="app.js"></script>
