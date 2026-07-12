@@ -420,6 +420,9 @@ function initEventListeners() {
     // Google Sign-In Click
     loginGoogleBtn.addEventListener('click', () => {
         const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
         firebase.auth().signInWithPopup(provider).catch(err => {
             console.error("Google login failed:", err);
             alert("ログインに失敗しました。");
