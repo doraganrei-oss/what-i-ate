@@ -133,15 +133,26 @@
                                 <button class="gacha-filter-btn active" data-val="all">すべて</button>
                                 <button class="gacha-filter-btn" data-val="japanese">和風 🇯🇵</button>
                                 <button class="gacha-filter-btn" data-val="western">洋風 🍔</button>
-                                <button class="gacha-filter-btn" data-val="chinese">中華 🇨🇳</button>
+                                <button class="gacha-filter-btn" data-val="other">その他 🍛</button>
                             </div>
                         </div>
                         <div class="gacha-filter-group">
-                            <span class="gacha-filter-label">ボリューム:</span>
+                            <span class="gacha-filter-label">味の傾向:</span>
                             <div class="gacha-filter-options" id="gachaFilterTaste">
                                 <button class="gacha-filter-btn active" data-val="all">すべて</button>
                                 <button class="gacha-filter-btn" data-val="light">あっさり 🥗</button>
                                 <button class="gacha-filter-btn" data-val="heavy">ガッツリ 🍖</button>
+                            </div>
+                        </div>
+                        <div class="gacha-filter-group">
+                            <span class="gacha-filter-label">食材:</span>
+                            <div class="gacha-filter-options" id="gachaFilterIngredient">
+                                <button class="gacha-filter-btn active" data-val="all">すべて</button>
+                                <button class="gacha-filter-btn" data-val="pork">豚 🐷</button>
+                                <button class="gacha-filter-btn" data-val="chicken">鶏 🐔</button>
+                                <button class="gacha-filter-btn" data-val="beef">牛 🐮</button>
+                                <button class="gacha-filter-btn" data-val="seafood">魚介 🐟</button>
+                                <button class="gacha-filter-btn" data-val="other">その他 🥕</button>
                             </div>
                         </div>
                     </div>
@@ -207,14 +218,24 @@
                                         <select id="recipeStyle" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
                                             <option value="japanese">和風 🇯🇵</option>
                                             <option value="western">洋風 🍔</option>
-                                            <option value="chinese">中華 🇨🇳</option>
+                                            <option value="other">その他 🍛</option>
                                         </select>
                                     </div>
                                     <div class="form-group" style="flex: 1;">
-                                        <label for="recipeTaste" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">ボリューム *</label>
+                                        <label for="recipeTaste" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">味の傾向 *</label>
                                         <select id="recipeTaste" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
                                             <option value="light">あっさり 🥗</option>
                                             <option value="heavy">ガッツリ 🍖</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="recipeIngredient" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">食材 *</label>
+                                        <select id="recipeIngredient" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                            <option value="pork">豚 🐷</option>
+                                            <option value="chicken">鶏 🐔</option>
+                                            <option value="beef">牛 🐮</option>
+                                            <option value="seafood">魚介 🐟</option>
+                                            <option value="other">その他 🥕</option>
                                         </select>
                                     </div>
                                 </div>
@@ -471,6 +492,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.4"></script>
+    <script src="app.js?v=2.5"></script>
 </body>
 </html>

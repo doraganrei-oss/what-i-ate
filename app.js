@@ -160,13 +160,15 @@ const recipeTitleInput = document.getElementById('recipeTitle');
 const recipeCreatorInput = document.getElementById('recipeCreator');
 const recipeStyleSelect = document.getElementById('recipeStyle');
 const recipeTasteSelect = document.getElementById('recipeTaste');
+const recipeIngredientSelect = document.getElementById('recipeIngredient');
 
 // Gacha State
 let youtubeRecipes = [];
 let currentSelectedRecipe = null;
 let activeGachaFilters = {
     style: 'all',
-    taste: 'all'
+    taste: 'all',
+    ingredient: 'all'
 };
 
 // Authentication & Profile Elements
@@ -490,6 +492,15 @@ function initEventListeners() {
             tasteFilterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             activeGachaFilters.taste = btn.getAttribute('data-val');
+        });
+    });
+
+    const ingredientFilterBtns = document.querySelectorAll('#gachaFilterIngredient .gacha-filter-btn');
+    ingredientFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            ingredientFilterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeGachaFilters.ingredient = btn.getAttribute('data-val');
         });
     });
 
@@ -1644,9 +1655,12 @@ function spinGacha() {
     if (activeGachaFilters.taste !== 'all') {
         candidates = candidates.filter(r => r.taste === activeGachaFilters.taste);
     }
+    if (activeGachaFilters.ingredient !== 'all') {
+        candidates = candidates.filter(r => r.ingredient === activeGachaFilters.ingredient);
+    }
 
     if (candidates.length === 0) {
-        alert("選択されたジャンルとボリュームに一致する料理動画がありません。フィルターを変更してください！");
+        alert("選択されたジャンル、味の傾向、または食材に一致する料理動画がありません。フィルターを変更してください！");
         return;
     }
 
@@ -1725,10 +1739,18 @@ function handleRegisterRecipe(e) {
     const creator = recipeCreatorInput.value.trim();
     const style = recipeStyleSelect.value;
     const taste = recipeTasteSelect.value;
+    const ingredient = recipeIngredientSelect.value;
 
     const videoId = extractYoutubeId(rawUrl);
     if (!videoId) {
         alert("有効なYouTubeの動画URLまたは11桁の動画IDを入力してください。");
+        return;
+    }
+
+    // Duplicate Check Validation
+    const isDuplicate = youtubeRecipes.some(r => r.id === videoId);
+    if (isDuplicate) {
+        alert("この動画は既にガチャに登録されています！");
         return;
     }
 
@@ -1737,7 +1759,8 @@ function handleRegisterRecipe(e) {
         title: title,
         creator: creator,
         style: style,
-        taste: taste
+        taste: taste,
+        ingredient: ingredient
     };
 
     if (db) {
