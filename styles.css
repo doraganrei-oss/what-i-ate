@@ -2311,6 +2311,41 @@ body {
         flex-direction: column;
         gap: 8px !important;
     }
+
+    /* Optimize Gacha Result Card on Mobile (Full-Bleed Cinema Layout) */
+    .gacha-result-card {
+        margin-left: -12px;
+        margin-right: -12px;
+        padding: 16px 12px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        margin-top: 16px;
+    }
+    .gacha-youtube-container {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-radius: 0;
+    }
+    #gachaResultTitle {
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+    .gacha-result-desc {
+        font-size: 11px;
+        margin-bottom: 12px;
+    }
+    .gacha-result-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .gacha-action-btn {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 13px;
+        box-sizing: border-box;
+        text-align: center;
+    }
 }
 
 /* Gacha Recipe Manager Accordion */
