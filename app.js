@@ -162,6 +162,7 @@ const recipeStyleSelect = document.getElementById('recipeStyle');
 const recipeTasteSelect = document.getElementById('recipeTaste');
 const recipeIngredientSelect = document.getElementById('recipeIngredient');
 const recipeFocusSelect = document.getElementById('recipeFocus');
+const customRecipesList = document.getElementById('customRecipesList');
 
 // Gacha State
 let youtubeRecipes = [];
@@ -1639,9 +1640,13 @@ function mergeCustomRecipes() {
                     }
                 });
                 console.log(`Merged Firestore recipes. Total is now: ${youtubeRecipes.length}`);
+                renderCustomRecipeList(customRecipes);
+            } else {
+                renderCustomRecipeList([]);
             }
         }).catch(err => {
             console.error("Failed to load custom recipes from Firestore:", err);
+            renderCustomRecipeList([]);
         });
     } else {
         try {
@@ -1652,8 +1657,10 @@ function mergeCustomRecipes() {
                 }
             });
             console.log(`Merged LocalStorage recipes. Total is now: ${youtubeRecipes.length}`);
+            renderCustomRecipeList(localCustoms);
         } catch (err) {
             console.error("Failed to load custom recipes from LocalStorage:", err);
+            renderCustomRecipeList([]);
         }
     }
 }
@@ -1839,6 +1846,7 @@ function handleRegisterRecipe(e) {
 }
 
 // --- Trigger successful toast notification ---
+// --- Trigger successful toast notification ---
 function onRecipeAddSuccess(recipe) {
     if (!youtubeRecipes.some(r => r.id === recipe.id)) {
         youtubeRecipes.push(recipe);
@@ -1847,11 +1855,85 @@ function onRecipeAddSuccess(recipe) {
     }
 
     addRecipeForm.reset();
-    gachaManagerAccordion.classList.remove('open');
+    
+    // Refresh the custom list display
+    mergeCustomRecipes();
 
+    showToastNotification(`「${recipe.title}」を追加登録しました！🎉`);
+}
+
+// --- Render custom recipe list inside the accordion ---
+function renderCustomRecipeList(customList) {
+    if (!customRecipesList) return;
+    customRecipesList.innerHTML = "";
+
+    if (!customList || customList.length === 0) {
+        customRecipesList.innerHTML = `<div class="custom-recipe-empty">登録済みのカスタムレシピはありません。</div>`;
+        return;
+    }
+
+    customList.forEach(recipe => {
+        const item = document.createElement('div');
+        item.className = 'custom-recipe-item';
+        item.innerHTML = `
+            <div class="custom-recipe-info">
+                <span class="custom-recipe-title">${recipe.title}</span>
+                <span class="custom-recipe-creator">${recipe.creator || '紹介者不明'}</span>
+            </div>
+            <button class="delete-recipe-btn" data-id="${recipe.id}">削除 🗑️</button>
+        `;
+        customRecipesList.appendChild(item);
+
+        // Bind delete action
+        item.querySelector('.delete-recipe-btn').addEventListener('click', () => {
+            handleDeleteRecipe(recipe.id, recipe.title);
+        });
+    });
+}
+
+// --- Delete recipe from Gacha list ---
+function handleDeleteRecipe(videoId, title) {
+    if (!confirm(`「${title}」をガチャから削除しますか？`)) return;
+
+    if (db && currentUser) {
+        db.collection('users').doc(currentUser.uid).get().then(doc => {
+            if (doc.exists) {
+                let customRecipes = doc.data().customRecipes || [];
+                customRecipes = customRecipes.filter(r => r.id !== videoId);
+
+                return db.collection('users').doc(currentUser.uid).update({
+                    customRecipes: customRecipes
+                }).then(() => {
+                    youtubeRecipes = youtubeRecipes.filter(r => r.id !== videoId);
+                    renderCustomRecipeList(customRecipes);
+                    showToastNotification(`「${title}」を削除しました。`);
+                });
+            }
+        }).catch(err => {
+            console.error("Failed to delete recipe from Firestore:", err);
+            alert("削除に失敗しました。");
+        });
+    } else {
+        try {
+            let localCustoms = JSON.parse(localStorage.getItem('custom_recipes')) || [];
+            localCustoms = localCustoms.filter(r => r.id !== videoId);
+            localStorage.setItem('custom_recipes', JSON.stringify(localCustoms));
+
+            youtubeRecipes = youtubeRecipes.filter(r => r.id !== videoId);
+            renderCustomRecipeList(localCustoms);
+            showToastNotification(`「${title}」を削除しました。`);
+        } catch (err) {
+            console.error("Failed to delete recipe from LocalStorage:", err);
+            alert("削除に失敗しました。");
+        }
+    }
+}
+
+// --- Helper to show Toast Notification ---
+function showToastNotification(message) {
     const toast = document.createElement('div');
     toast.className = 'toast-notification';
-    toast.textContent = `「${recipe.title}」を追加登録しました！🎉`;
+    toast.textContent = message;
     toast.style.cssText = `
         position: fixed;
         bottom: 80px;

@@ -262,6 +262,14 @@
                                 </div>
                                 <button type="submit" class="gacha-btn" style="margin-top: 16px; width: 100%; padding: 12px; box-shadow: 0 4px 10px rgba(255,192,69,0.25);">ガチャに新レシピを登録する ✨</button>
                             </form>
+
+                            <!-- Custom Recipe List Manager -->
+                            <div class="custom-recipes-list-section" style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
+                                <h4 style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px;">登録済みのカスタムレシピ 📋</h4>
+                                <div id="customRecipesList" class="custom-recipes-list">
+                                    <!-- Dynamic list of custom recipes will be injected here -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -513,6 +521,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.9"></script>
+    <script src="app.js?v=2.10"></script>
 </body>
 </html>
