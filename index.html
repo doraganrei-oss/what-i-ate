@@ -241,15 +241,24 @@
                                 </div>
                                 <div class="form-row" style="display: flex; gap: 10px; margin-top: 10px;">
                                     <div class="form-group" style="flex: 1;">
-                                        <label for="recipeIngredient" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">食材 *</label>
-                                        <select id="recipeIngredient" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
-                                            <option value="all">すべて / 指定なし 🌐</option>
-                                            <option value="pork">豚 🐷</option>
-                                            <option value="chicken">鶏 🐔</option>
-                                            <option value="beef">牛 🐮</option>
-                                            <option value="seafood">魚介 🐟</option>
-                                            <option value="other">その他 🥕</option>
-                                        </select>
+                                        <label style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; display: block;">食材 (複数選択可) *</label>
+                                        <div class="checkbox-group" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background-color: #FFF; padding: 8px 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-sizing: border-box;">
+                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                                <input type="checkbox" name="recipeIngredients" value="pork" style="cursor: pointer;"> 豚 🐷
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                                <input type="checkbox" name="recipeIngredients" value="chicken" style="cursor: pointer;"> 鶏 🐔
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                                <input type="checkbox" name="recipeIngredients" value="beef" style="cursor: pointer;"> 牛 🐮
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                                <input type="checkbox" name="recipeIngredients" value="seafood" style="cursor: pointer;"> 魚介 🐟
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer; grid-column: span 2;">
+                                                <input type="checkbox" name="recipeIngredients" value="other" style="cursor: pointer;"> その他 🥕
+                                            </label>
+                                        </div>
                                     </div>
                                     <div class="form-group" style="flex: 1;">
                                         <label for="recipeFocus" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">こだわり *</label>
@@ -521,6 +530,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.14"></script>
+    <script src="app.js?v=2.15"></script>
 </body>
 </html>

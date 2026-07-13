@@ -169,7 +169,6 @@ const recipeTitleInput = document.getElementById('recipeTitle');
 const recipeCreatorInput = document.getElementById('recipeCreator');
 const recipeStyleSelect = document.getElementById('recipeStyle');
 const recipeTasteSelect = document.getElementById('recipeTaste');
-const recipeIngredientSelect = document.getElementById('recipeIngredient');
 const recipeFocusSelect = document.getElementById('recipeFocus');
 const customRecipesList = document.getElementById('customRecipesList');
 
@@ -179,7 +178,7 @@ let currentSelectedRecipe = null;
 let activeGachaFilters = {
     style: 'all',
     taste: 'all',
-    ingredient: 'all',
+    ingredients: [],
     focus: 'all'
 };
 
@@ -527,9 +526,25 @@ function initEventListeners() {
     const ingredientFilterBtns = document.querySelectorAll('#gachaFilterIngredient .gacha-filter-btn');
     ingredientFilterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            ingredientFilterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            activeGachaFilters.ingredient = btn.getAttribute('data-val');
+            const val = btn.getAttribute('data-val');
+            if (val === 'all') {
+                ingredientFilterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeGachaFilters.ingredients = [];
+            } else {
+                const allBtn = Array.from(ingredientFilterBtns).find(b => b.getAttribute('data-val') === 'all');
+                if (allBtn) allBtn.classList.remove('active');
+
+                btn.classList.toggle('active');
+
+                const activeBtns = Array.from(ingredientFilterBtns).filter(b => b.classList.contains('active') && b.getAttribute('data-val') !== 'all');
+                if (activeBtns.length > 0) {
+                    activeGachaFilters.ingredients = activeBtns.map(b => b.getAttribute('data-val'));
+                } else {
+                    if (allBtn) allBtn.classList.add('active');
+                    activeGachaFilters.ingredients = [];
+                }
+            }
         });
     });
 
@@ -1683,8 +1698,11 @@ function spinGacha() {
     if (activeGachaFilters.taste !== 'all') {
         candidates = candidates.filter(r => r.taste === activeGachaFilters.taste || r.taste === 'all');
     }
-    if (activeGachaFilters.ingredient !== 'all') {
-        candidates = candidates.filter(r => r.ingredient === activeGachaFilters.ingredient || r.ingredient === 'all');
+    if (activeGachaFilters.ingredients && activeGachaFilters.ingredients.length > 0) {
+        candidates = candidates.filter(r => {
+            const recipeIngredients = Array.isArray(r.ingredients) ? r.ingredients : [r.ingredient || 'other'];
+            return recipeIngredients.includes('all') || recipeIngredients.some(i => activeGachaFilters.ingredients.includes(i));
+        });
     }
     if (activeGachaFilters.focus !== 'all') {
         candidates = candidates.filter(r => {
@@ -1781,8 +1799,14 @@ function handleRegisterRecipe(e) {
     const creator = recipeCreatorInput.value.trim();
     const style = recipeStyleSelect.value;
     const taste = recipeTasteSelect.value;
-    const ingredient = recipeIngredientSelect.value;
     const focus = recipeFocusSelect.value;
+
+    const checkedBoxes = document.querySelectorAll('input[name="recipeIngredients"]:checked');
+    const ingredients = Array.from(checkedBoxes).map(cb => cb.value);
+    if (ingredients.length === 0) {
+        alert("食材を少なくとも1つ選択してください。");
+        return;
+    }
 
     const videoId = extractYoutubeId(rawUrl);
     if (!videoId) {
@@ -1803,7 +1827,7 @@ function handleRegisterRecipe(e) {
         creator: creator,
         style: style,
         taste: taste,
-        ingredient: ingredient,
+        ingredients: ingredients,
         focus: focus
     };
 
