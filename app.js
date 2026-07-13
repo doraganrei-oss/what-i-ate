@@ -240,6 +240,9 @@ function initData() {
                     
                     // Show FAB (+) button since user is logged in
                     openModalBtn.style.display = 'flex';
+                    
+                    // Fetch and merge user custom recipes
+                    mergeCustomRecipes();
                 } else {
                     currentUser = null;
                     userProfile = { nickname: "ゲスト", avatar: "" };
@@ -1625,8 +1628,8 @@ function loadRecipes() {
 
 // --- Fetch and merge custom user recipes from Firestore or LocalStorage ---
 function mergeCustomRecipes() {
-    if (db) {
-        db.collection('recipes').get().then(snap => {
+    if (db && currentUser) {
+        db.collection('users').doc(currentUser.uid).collection('custom_recipes').get().then(snap => {
             if (!snap.empty) {
                 snap.docs.forEach(doc => {
                     const data = doc.data();
@@ -1790,8 +1793,8 @@ function handleRegisterRecipe(e) {
         focus: focus
     };
 
-    if (db) {
-        db.collection('recipes').doc(videoId).set({
+    if (db && currentUser) {
+        db.collection('users').doc(currentUser.uid).collection('custom_recipes').doc(videoId).set({
             ...newRecipe,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
