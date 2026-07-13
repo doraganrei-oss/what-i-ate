@@ -1606,7 +1606,7 @@ function updateStreak() {
 
 // --- Load recipes dynamically ---
 function loadRecipes() {
-    fetch('recipes.json?v=2.3')
+    fetch('recipes.json?v=2.4')
         .then(res => {
             if (!res.ok) throw new Error("recipes.json not found");
             return res.json();
@@ -1618,11 +1618,7 @@ function loadRecipes() {
         })
         .catch(err => {
             console.error("Failed to load recipes.json:", err);
-            youtubeRecipes = [
-                { "id": "Ry4B-G29LWs", "title": "至高のハンバーグ", "creator": "料理研究家リュウジ", "style": "western", "taste": "heavy" },
-                { "id": "FwD6B2j9x3Q", "title": "極上生姜焼き", "creator": "コウケンテツ", "style": "japanese", "taste": "heavy" },
-                { "id": "hB3v5Jb8cDw", "title": "とろとろオムライス", "creator": "クラシル", "style": "western", "taste": "heavy" }
-            ];
+            youtubeRecipes = [];
             mergeCustomRecipes();
         });
 }
