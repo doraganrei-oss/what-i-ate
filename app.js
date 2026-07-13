@@ -10,6 +10,15 @@ const firebaseConfig = {
 };
 let db = null;
 
+// --- Gacha Administrator Config ---
+// ※ここにあなたのGoogleログイン用メールアドレスを記載してください。
+// このリストに入っているメールアドレスでログインしたユーザーのみ、レシピの追加・管理（削除含む）ができるようになります。
+const ADMIN_EMAILS = [
+    "doraganrei@gmail.com",
+    "doraganrei.oss@gmail.com",
+    "reido.zero@gmail.com"
+];
+
 // --- Pre-defined Gacha Menu Database ---
 const GACHA_DB = [
     { title: "とろとろオムライス", desc: "ふわふわの卵にデミグラスソースがたっぷりかかった王道洋食。自炊ならバター多めが吉！", category: "self-cooked", emoji: "🍳" },
@@ -242,8 +251,15 @@ function initData() {
                     // Show FAB (+) button since user is logged in
                     openModalBtn.style.display = 'flex';
                     
-                    // Fetch and merge user custom recipes
-                    mergeCustomRecipes();
+                    // Show Gacha manager accordion ONLY for administrators
+                    if (ADMIN_EMAILS.includes(user.email)) {
+                        gachaManagerAccordion.style.display = 'block';
+                    } else {
+                        gachaManagerAccordion.style.display = 'none';
+                    }
+                    
+                    // Load shared recipes from Firestore
+                    loadSharedRecipes();
                 } else {
                     currentUser = null;
                     userProfile = { nickname: "ゲスト", avatar: "" };
@@ -258,6 +274,12 @@ function initData() {
                     
                     // Show FAB (+) button (clicking it will open login prompt)
                     openModalBtn.style.display = 'flex';
+
+                    // Hide Gacha manager accordion for guests
+                    gachaManagerAccordion.style.display = 'none';
+
+                    // Load shared recipes from Firestore for guests
+                    loadSharedRecipes();
                 }
             });
             
@@ -1614,49 +1636,38 @@ function loadRecipes() {
         .then(data => {
             youtubeRecipes = data;
             console.log(`Loaded ${youtubeRecipes.length} recipes from json!`);
-            mergeCustomRecipes();
+            loadSharedRecipes();
         })
         .catch(err => {
             console.error("Failed to load recipes.json:", err);
             youtubeRecipes = [];
-            mergeCustomRecipes();
+            loadSharedRecipes();
         });
 }
 
-// --- Fetch and merge custom user recipes from Firestore or LocalStorage ---
-function mergeCustomRecipes() {
-    if (db && currentUser) {
-        db.collection('users').doc(currentUser.uid).get().then(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                const customRecipes = data.customRecipes || [];
-                customRecipes.forEach(recipe => {
-                    if (!youtubeRecipes.some(r => r.id === recipe.id)) {
-                        youtubeRecipes.push(recipe);
-                    }
+// --- Fetch and load shared Gacha recipes from Firestore or LocalStorage ---
+function loadSharedRecipes() {
+    if (db) {
+        db.collection('recipes').get().then(snap => {
+            youtubeRecipes = [];
+            if (!snap.empty) {
+                snap.docs.forEach(doc => {
+                    youtubeRecipes.push(doc.data());
                 });
-                console.log(`Merged Firestore recipes. Total is now: ${youtubeRecipes.length}`);
-                renderCustomRecipeList(customRecipes);
-            } else {
-                renderCustomRecipeList([]);
+                console.log(`Loaded shared Firestore recipes. Total: ${youtubeRecipes.length}`);
             }
+            renderCustomRecipeList(youtubeRecipes);
         }).catch(err => {
-            console.error("Failed to load custom recipes from Firestore:", err);
-            renderCustomRecipeList([]);
+            console.error("Failed to load shared recipes from Firestore:", err);
         });
     } else {
         try {
             const localCustoms = JSON.parse(localStorage.getItem('custom_recipes')) || [];
-            localCustoms.forEach(recipe => {
-                if (!youtubeRecipes.some(r => r.id === recipe.id)) {
-                    youtubeRecipes.push(recipe);
-                }
-            });
-            console.log(`Merged LocalStorage recipes. Total is now: ${youtubeRecipes.length}`);
-            renderCustomRecipeList(localCustoms);
+            youtubeRecipes = localCustoms;
+            console.log(`Loaded local Gacha recipes. Total: ${youtubeRecipes.length}`);
+            renderCustomRecipeList(youtubeRecipes);
         } catch (err) {
-            console.error("Failed to load custom recipes from LocalStorage:", err);
-            renderCustomRecipeList([]);
+            console.error("Failed to load local Gacha recipes:", err);
         }
     }
 }
@@ -1797,35 +1808,17 @@ function handleRegisterRecipe(e) {
         focus: focus
     };
 
-    if (db && currentUser) {
-        db.collection('users').doc(currentUser.uid).get().then(doc => {
-            let customRecipes = [];
-            if (doc.exists) {
-                customRecipes = doc.data().customRecipes || [];
-            }
-            customRecipes = customRecipes.filter(r => r.id !== videoId);
-            customRecipes.push(newRecipe);
+    if (db) {
+        if (!currentUser || !ADMIN_EMAILS.includes(currentUser.email)) {
+            alert("レシピを登録する権限がありません。管理者用のアカウントでログインしてください。");
+            return;
+        }
 
-            return db.collection('users').doc(currentUser.uid).update({
-                customRecipes: customRecipes
-            });
-        }).then(() => {
+        db.collection('recipes').doc(videoId).set(newRecipe).then(() => {
             onRecipeAddSuccess(newRecipe);
         }).catch(err => {
-            console.error("Failed to save recipe to Firestore user document:", err);
-            // Try set fallback in case document does not exist yet (though it should)
-            if (err.code === 'not-found') {
-                db.collection('users').doc(currentUser.uid).set({
-                    customRecipes: [newRecipe]
-                }, { merge: true }).then(() => {
-                    onRecipeAddSuccess(newRecipe);
-                }).catch(setErr => {
-                    console.error("Failed set recipe fallback:", setErr);
-                    alert("Firestoreへの保存に失敗しました。");
-                });
-            } else {
-                alert("Firestoreへの保存に失敗しました。");
-            }
+            console.error("Failed to save recipe to Firestore:", err);
+            alert("Firestoreへの保存に失敗しました。");
         });
     } else {
         try {
@@ -1842,7 +1835,6 @@ function handleRegisterRecipe(e) {
 }
 
 // --- Trigger successful toast notification ---
-// --- Trigger successful toast notification ---
 function onRecipeAddSuccess(recipe) {
     if (!youtubeRecipes.some(r => r.id === recipe.id)) {
         youtubeRecipes.push(recipe);
@@ -1853,7 +1845,7 @@ function onRecipeAddSuccess(recipe) {
     addRecipeForm.reset();
     
     // Refresh the custom list display
-    mergeCustomRecipes();
+    loadSharedRecipes();
 
     showToastNotification(`「${recipe.title}」を追加登録しました！🎉`);
 }
@@ -1889,34 +1881,30 @@ function renderCustomRecipeList(customList) {
 
 // --- Delete recipe from Gacha list ---
 function handleDeleteRecipe(videoId, title) {
-    if (!confirm(`「${title}」をガチャから削除しますか？`)) return;
+    if (db) {
+        if (!currentUser || !ADMIN_EMAILS.includes(currentUser.email)) {
+            alert("削除権限がありません。");
+            return;
+        }
+        if (!confirm(`「${title}」をガチャから削除しますか？`)) return;
 
-    if (db && currentUser) {
-        db.collection('users').doc(currentUser.uid).get().then(doc => {
-            if (doc.exists) {
-                let customRecipes = doc.data().customRecipes || [];
-                customRecipes = customRecipes.filter(r => r.id !== videoId);
-
-                return db.collection('users').doc(currentUser.uid).update({
-                    customRecipes: customRecipes
-                }).then(() => {
-                    youtubeRecipes = youtubeRecipes.filter(r => r.id !== videoId);
-                    renderCustomRecipeList(customRecipes);
-                    showToastNotification(`「${title}」を削除しました。`);
-                });
-            }
+        db.collection('recipes').doc(videoId).delete().then(() => {
+            youtubeRecipes = youtubeRecipes.filter(r => r.id !== videoId);
+            renderCustomRecipeList(youtubeRecipes);
+            showToastNotification(`「${title}」を削除しました。`);
         }).catch(err => {
             console.error("Failed to delete recipe from Firestore:", err);
             alert("削除に失敗しました。");
         });
     } else {
+        if (!confirm(`「${title}」をガチャから削除しますか？`)) return;
         try {
             let localCustoms = JSON.parse(localStorage.getItem('custom_recipes')) || [];
             localCustoms = localCustoms.filter(r => r.id !== videoId);
             localStorage.setItem('custom_recipes', JSON.stringify(localCustoms));
 
             youtubeRecipes = youtubeRecipes.filter(r => r.id !== videoId);
-            renderCustomRecipeList(localCustoms);
+            renderCustomRecipeList(youtubeRecipes);
             showToastNotification(`「${title}」を削除しました。`);
         } catch (err) {
             console.error("Failed to delete recipe from LocalStorage:", err);
