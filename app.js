@@ -287,6 +287,7 @@ function initData() {
             db.collection('meals').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
                 posts = [];
                 snapshot.forEach((doc) => {
+                    if (doc.id === 'shared_gacha_recipes') return;
                     const data = doc.data();
                     let dateStr = data.date;
                     if (data.createdAt && typeof data.createdAt.toDate === 'function') {
@@ -1648,13 +1649,11 @@ function loadRecipes() {
 // --- Fetch and load shared Gacha recipes from Firestore or LocalStorage ---
 function loadSharedRecipes() {
     if (db) {
-        db.collection('recipes').get().then(snap => {
+        db.collection('meals').doc('shared_gacha_recipes').get().then(doc => {
             youtubeRecipes = [];
-            if (!snap.empty) {
-                snap.docs.forEach(doc => {
-                    youtubeRecipes.push(doc.data());
-                });
-                console.log(`Loaded shared Firestore recipes. Total: ${youtubeRecipes.length}`);
+            if (doc.exists) {
+                youtubeRecipes = doc.data().recipes || [];
+                console.log(`Loaded shared Gacha recipes from Firestore. Total: ${youtubeRecipes.length}`);
             }
             renderCustomRecipeList(youtubeRecipes);
         }).catch(err => {
@@ -1814,7 +1813,16 @@ function handleRegisterRecipe(e) {
             return;
         }
 
-        db.collection('recipes').doc(videoId).set(newRecipe).then(() => {
+        db.collection('meals').doc('shared_gacha_recipes').get().then(doc => {
+            let recipes = [];
+            if (doc.exists) {
+                recipes = doc.data().recipes || [];
+            }
+            recipes = recipes.filter(r => r.id !== videoId);
+            recipes.push(newRecipe);
+
+            return db.collection('meals').doc('shared_gacha_recipes').set({ recipes: recipes });
+        }).then(() => {
             onRecipeAddSuccess(newRecipe);
         }).catch(err => {
             console.error("Failed to save recipe to Firestore:", err);
@@ -1888,10 +1896,16 @@ function handleDeleteRecipe(videoId, title) {
         }
         if (!confirm(`「${title}」をガチャから削除しますか？`)) return;
 
-        db.collection('recipes').doc(videoId).delete().then(() => {
-            youtubeRecipes = youtubeRecipes.filter(r => r.id !== videoId);
-            renderCustomRecipeList(youtubeRecipes);
-            showToastNotification(`「${title}」を削除しました。`);
+        db.collection('meals').doc('shared_gacha_recipes').get().then(doc => {
+            if (doc.exists) {
+                let recipes = doc.data().recipes || [];
+                recipes = recipes.filter(r => r.id !== videoId);
+                return db.collection('meals').doc('shared_gacha_recipes').set({ recipes: recipes }).then(() => {
+                    youtubeRecipes = recipes;
+                    renderCustomRecipeList(youtubeRecipes);
+                    showToastNotification(`「${title}」を削除しました。`);
+                });
+            }
         }).catch(err => {
             console.error("Failed to delete recipe from Firestore:", err);
             alert("削除に失敗しました。");
