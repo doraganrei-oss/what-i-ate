@@ -1629,12 +1629,13 @@ function loadRecipes() {
 // --- Fetch and merge custom user recipes from Firestore or LocalStorage ---
 function mergeCustomRecipes() {
     if (db && currentUser) {
-        db.collection('users').doc(currentUser.uid).collection('custom_recipes').get().then(snap => {
-            if (!snap.empty) {
-                snap.docs.forEach(doc => {
-                    const data = doc.data();
-                    if (!youtubeRecipes.some(r => r.id === data.id)) {
-                        youtubeRecipes.push(data);
+        db.collection('users').doc(currentUser.uid).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                const customRecipes = data.customRecipes || [];
+                customRecipes.forEach(recipe => {
+                    if (!youtubeRecipes.some(r => r.id === recipe.id)) {
+                        youtubeRecipes.push(recipe);
                     }
                 });
                 console.log(`Merged Firestore recipes. Total is now: ${youtubeRecipes.length}`);
@@ -1794,14 +1795,34 @@ function handleRegisterRecipe(e) {
     };
 
     if (db && currentUser) {
-        db.collection('users').doc(currentUser.uid).collection('custom_recipes').doc(videoId).set({
-            ...newRecipe,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        db.collection('users').doc(currentUser.uid).get().then(doc => {
+            let customRecipes = [];
+            if (doc.exists) {
+                customRecipes = doc.data().customRecipes || [];
+            }
+            customRecipes = customRecipes.filter(r => r.id !== videoId);
+            customRecipes.push(newRecipe);
+
+            return db.collection('users').doc(currentUser.uid).update({
+                customRecipes: customRecipes
+            });
         }).then(() => {
             onRecipeAddSuccess(newRecipe);
         }).catch(err => {
-            console.error("Failed to save recipe to Firestore:", err);
-            alert("Firestoreへの保存に失敗しました。");
+            console.error("Failed to save recipe to Firestore user document:", err);
+            // Try set fallback in case document does not exist yet (though it should)
+            if (err.code === 'not-found') {
+                db.collection('users').doc(currentUser.uid).set({
+                    customRecipes: [newRecipe]
+                }, { merge: true }).then(() => {
+                    onRecipeAddSuccess(newRecipe);
+                }).catch(setErr => {
+                    console.error("Failed set recipe fallback:", setErr);
+                    alert("Firestoreへの保存に失敗しました。");
+                });
+            } else {
+                alert("Firestoreへの保存に失敗しました。");
+            }
         });
     } else {
         try {
