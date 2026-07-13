@@ -155,6 +155,14 @@
                                 <button class="gacha-filter-btn" data-val="other">その他 🥕</button>
                             </div>
                         </div>
+                        <div class="gacha-filter-group">
+                            <span class="gacha-filter-label">こだわり:</span>
+                            <div class="gacha-filter-options" id="gachaFilterFocus">
+                                <button class="gacha-filter-btn active" data-val="all">すべて</button>
+                                <button class="gacha-filter-btn" data-val="quick">時短 ⏱️</button>
+                                <button class="gacha-filter-btn" data-val="budget">節約 🪙</button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="gacha-machine-wrapper">
@@ -216,6 +224,7 @@
                                     <div class="form-group" style="flex: 1;">
                                         <label for="recipeStyle" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">ジャンル *</label>
                                         <select id="recipeStyle" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                            <option value="all">すべて / 指定なし 🌐</option>
                                             <option value="japanese">和風 🇯🇵</option>
                                             <option value="western">洋風 🍔</option>
                                             <option value="other">その他 🍛</option>
@@ -224,18 +233,30 @@
                                     <div class="form-group" style="flex: 1;">
                                         <label for="recipeTaste" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">味の傾向 *</label>
                                         <select id="recipeTaste" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                            <option value="all">すべて / 指定なし 🌐</option>
                                             <option value="light">あっさり 🥗</option>
                                             <option value="heavy">ガッツリ 🍖</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div class="form-row" style="display: flex; gap: 10px; margin-top: 10px;">
                                     <div class="form-group" style="flex: 1;">
                                         <label for="recipeIngredient" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">食材 *</label>
                                         <select id="recipeIngredient" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                            <option value="all">すべて / 指定なし 🌐</option>
                                             <option value="pork">豚 🐷</option>
                                             <option value="chicken">鶏 🐔</option>
                                             <option value="beef">牛 🐮</option>
                                             <option value="seafood">魚介 🐟</option>
                                             <option value="other">その他 🥕</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="recipeFocus" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">こだわり *</label>
+                                        <select id="recipeFocus" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                            <option value="all">すべて / 指定なし 🌐</option>
+                                            <option value="quick">時短 ⏱️</option>
+                                            <option value="budget">節約 🪙</option>
                                         </select>
                                     </div>
                                 </div>
@@ -492,6 +513,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.5"></script>
+    <script src="app.js?v=2.7"></script>
 </body>
 </html>

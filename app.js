@@ -161,6 +161,7 @@ const recipeCreatorInput = document.getElementById('recipeCreator');
 const recipeStyleSelect = document.getElementById('recipeStyle');
 const recipeTasteSelect = document.getElementById('recipeTaste');
 const recipeIngredientSelect = document.getElementById('recipeIngredient');
+const recipeFocusSelect = document.getElementById('recipeFocus');
 
 // Gacha State
 let youtubeRecipes = [];
@@ -168,7 +169,8 @@ let currentSelectedRecipe = null;
 let activeGachaFilters = {
     style: 'all',
     taste: 'all',
-    ingredient: 'all'
+    ingredient: 'all',
+    focus: 'all'
 };
 
 // Authentication & Profile Elements
@@ -501,6 +503,15 @@ function initEventListeners() {
             ingredientFilterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             activeGachaFilters.ingredient = btn.getAttribute('data-val');
+        });
+    });
+
+    const focusFilterBtns = document.querySelectorAll('#gachaFilterFocus .gacha-filter-btn');
+    focusFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            focusFilterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeGachaFilters.focus = btn.getAttribute('data-val');
         });
     });
 
@@ -1650,17 +1661,23 @@ function spinGacha() {
     let candidates = youtubeRecipes;
     
     if (activeGachaFilters.style !== 'all') {
-        candidates = candidates.filter(r => r.style === activeGachaFilters.style);
+        candidates = candidates.filter(r => r.style === activeGachaFilters.style || r.style === 'all');
     }
     if (activeGachaFilters.taste !== 'all') {
-        candidates = candidates.filter(r => r.taste === activeGachaFilters.taste);
+        candidates = candidates.filter(r => r.taste === activeGachaFilters.taste || r.taste === 'all');
     }
     if (activeGachaFilters.ingredient !== 'all') {
-        candidates = candidates.filter(r => r.ingredient === activeGachaFilters.ingredient);
+        candidates = candidates.filter(r => r.ingredient === activeGachaFilters.ingredient || r.ingredient === 'all');
+    }
+    if (activeGachaFilters.focus !== 'all') {
+        candidates = candidates.filter(r => {
+            const f = r.focus || 'all';
+            return f === activeGachaFilters.focus || f === 'all';
+        });
     }
 
     if (candidates.length === 0) {
-        alert("選択されたジャンル、味の傾向、または食材に一致する料理動画がありません。フィルターを変更してください！");
+        alert("選択されたジャンル、味の傾向、食材、またはこだわりに一致する料理動画がありません。フィルターを変更してください！");
         return;
     }
 
@@ -1725,6 +1742,14 @@ function extractYoutubeId(url) {
     if (cleanUrl.length === 11 && !cleanUrl.includes('/') && !cleanUrl.includes('?')) {
         return cleanUrl;
     }
+    // Match YouTube Shorts: youtube.com/shorts/VIDEO_ID
+    if (cleanUrl.includes('/shorts/')) {
+        const parts = cleanUrl.split('/shorts/');
+        if (parts.length > 1) {
+            const segment = parts[1].split(/[?#]/)[0];
+            if (segment.length === 11) return segment;
+        }
+    }
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = cleanUrl.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
@@ -1740,6 +1765,7 @@ function handleRegisterRecipe(e) {
     const style = recipeStyleSelect.value;
     const taste = recipeTasteSelect.value;
     const ingredient = recipeIngredientSelect.value;
+    const focus = recipeFocusSelect.value;
 
     const videoId = extractYoutubeId(rawUrl);
     if (!videoId) {
@@ -1760,7 +1786,8 @@ function handleRegisterRecipe(e) {
         creator: creator,
         style: style,
         taste: taste,
-        ingredient: ingredient
+        ingredient: ingredient,
+        focus: focus
     };
 
     if (db) {
