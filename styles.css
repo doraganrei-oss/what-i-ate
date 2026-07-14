@@ -191,14 +191,132 @@ body {
 }
 
 /* Timeline Feed */
-.timeline-header {
-    margin-bottom: 16px;
+/* Timeline Feed Panel */
+.timeline-header-panel {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-soft);
 }
 
-.timeline-header h2 {
+.timeline-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.timeline-title-row h2 {
     font-size: 18px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.timeline-filter-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.timeline-filter-selects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .timeline-filter-selects-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.select-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.select-wrapper label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.select-wrapper select {
+    padding: 8px 10px;
+    font-size: 12px;
     font-weight: 700;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    background-color: #FFF;
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select-wrapper select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255,107,74,0.1);
+}
+
+.select-wrapper.highlight select {
+    border-color: var(--secondary-color);
+    background-color: #FFFDF8;
+}
+
+/* Post Tag Badges styling */
+.post-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     margin-bottom: 12px;
+}
+
+.post-tag-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 50px;
+    background-color: #FAF8F5;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.post-tag-badge.style {
+    background-color: #E8F5E9;
+    border-color: #C8E6C9;
+    color: #2E7D32;
+}
+
+.post-tag-badge.genre {
+    background-color: #E3F2FD;
+    border-color: #BBDEFB;
+    color: #1565C0;
+}
+
+.post-tag-badge.taste {
+    background-color: #FFF3E0;
+    border-color: #FFE0B2;
+    color: #E65100;
+}
+
+.post-tag-badge.ingredient {
+    background-color: #F3E5F5;
+    border-color: #E1BEE7;
+    color: #6A1B9A;
+}
+
+.post-tag-badge.focus {
+    background-color: #E0F7FA;
+    border-color: #B2EBF2;
+    color: #00838F;
 }
 
 .filter-bar {

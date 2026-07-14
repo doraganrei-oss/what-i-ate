@@ -119,7 +119,7 @@ const detailMealType = document.getElementById('detailMealType');
 const detailCategory = document.getElementById('detailCategory');
 const detailTime = document.getElementById('detailTime');
 const detailTitle = document.getElementById('detailTitle');
-const detailStarsInner = document.getElementById('detailStarsInner');
+const detailTagsContainer = document.getElementById('detailTagsContainer');
 const detailComment = document.getElementById('detailComment');
 
 // User Home Modal Elements
@@ -407,6 +407,24 @@ function initEventListeners() {
             currentFilter = btn.dataset.filter;
             renderFeed();
         });
+    });
+
+    // Timeline Dropdown Filters
+    const timelineFilters = [
+        'timelineStyleFilter',
+        'timelineGenreFilter',
+        'timelineTasteFilter',
+        'timelineIngredientFilter',
+        'timelineFocusFilter',
+        'timelineSortFilter'
+    ];
+    timelineFilters.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', () => {
+                renderFeed();
+            });
+        }
     });
 
     // Open & Close Create Modal
@@ -733,13 +751,88 @@ function handleProfileSubmit(e) {
 }
 
 // --- Render Timeline Feed ---
+function getPostTagsHtml(post) {
+    let tagsHtml = '';
+    
+    // Category tag
+    tagsHtml += `<span class="post-tag-badge style">${getCategoryLabel(post.category)}</span>`;
+    
+    // Genre tag
+    if (post.genre && post.genre !== 'all') {
+        const labels = { japanese: '和風 🇯🇵', western: '洋風 🍔', other: 'その他 🍛' };
+        tagsHtml += `<span class="post-tag-badge genre">${labels[post.genre] || post.genre}</span>`;
+    }
+    
+    // Taste tag
+    if (post.taste && post.taste !== 'all') {
+        const labels = { light: 'あっさり 🥗', heavy: 'ガッツリ 🍖' };
+        tagsHtml += `<span class="post-tag-badge taste">${labels[post.taste] || post.taste}</span>`;
+    }
+    
+    // Ingredients tags
+    if (Array.isArray(post.ingredients) && post.ingredients.length > 0) {
+        const labels = { pork: '豚 🐷', chicken: '鶏 🐔', beef: '牛 🐮', seafood: '魚介 🐟', other: 'その他 🥕' };
+        post.ingredients.forEach(ing => {
+            tagsHtml += `<span class="post-tag-badge ingredient">${labels[ing] || ing}</span>`;
+        });
+    } else if (post.ingredient && post.ingredient !== 'all') {
+        const labels = { pork: '豚 🐷', chicken: '鶏 🐔', beef: '牛 🐮', seafood: '魚介 🐟', other: 'その他 🥕' };
+        tagsHtml += `<span class="post-tag-badge ingredient">${labels[post.ingredient] || post.ingredient}</span>`;
+    }
+    
+    // Focus tag
+    if (post.focus && post.focus !== 'all') {
+        const labels = { quick: '時短 ⏱️', budget: '節約 🪙' };
+        tagsHtml += `<span class="post-tag-badge focus">${labels[post.focus] || post.focus}</span>`;
+    }
+    
+    return tagsHtml;
+}
+
 function renderFeed() {
     feedGrid.innerHTML = '';
     
-    const filteredPosts = posts.filter(post => {
-        if (currentFilter === 'all') return true;
-        return post.mealType === currentFilter;
+    const styleFilter = document.getElementById('timelineStyleFilter');
+    const genreFilter = document.getElementById('timelineGenreFilter');
+    const tasteFilter = document.getElementById('timelineTasteFilter');
+    const ingredientFilter = document.getElementById('timelineIngredientFilter');
+    const focusFilter = document.getElementById('timelineFocusFilter');
+    const sortFilter = document.getElementById('timelineSortFilter');
+    
+    const styleVal = styleFilter ? styleFilter.value : 'all';
+    const genreVal = genreFilter ? genreFilter.value : 'all';
+    const tasteVal = tasteFilter ? tasteFilter.value : 'all';
+    const ingredientVal = ingredientFilter ? ingredientFilter.value : 'all';
+    const focusVal = focusFilter ? focusFilter.value : 'all';
+    const sortVal = sortFilter ? sortFilter.value : 'newest';
+
+    let filteredPosts = posts.filter(post => {
+        const matchesMealType = (currentFilter === 'all' || post.mealType === currentFilter);
+        const matchesStyle = (styleVal === 'all' || post.category === styleVal);
+        const matchesGenre = (genreVal === 'all' || post.genre === genreVal);
+        const matchesTaste = (tasteVal === 'all' || post.taste === tasteVal);
+        
+        let matchesIngredient = true;
+        if (ingredientVal !== 'all') {
+            if (Array.isArray(post.ingredients)) {
+                matchesIngredient = post.ingredients.includes(ingredientVal);
+            } else if (post.ingredient) {
+                matchesIngredient = (post.ingredient === ingredientVal);
+            } else {
+                matchesIngredient = false;
+            }
+        }
+        
+        const matchesFocus = (focusVal === 'all' || post.focus === focusVal);
+        
+        return matchesMealType && matchesStyle && matchesGenre && matchesTaste && matchesIngredient && matchesFocus;
     });
+
+    if (sortVal === 'newest') {
+        filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (sortVal === 'popular') {
+        filteredPosts.sort((a, b) => b.deliciousCount - a.deliciousCount);
+    }
 
     if (filteredPosts.length === 0) {
         feedGrid.innerHTML = `
@@ -771,6 +864,8 @@ function renderFeed() {
                <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
             : '';
 
+        const tagsHtml = getPostTagsHtml(post);
+
         // Check if current user has liked this post
         const hasLiked = db
             ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
@@ -787,7 +882,6 @@ function renderFeed() {
                     <span class="post-time">${formatDate(post.date)}</span>
                     <div class="post-badges">
                         <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
-                        <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
                         ${actionButtonsHtml}
                     </div>
                 </div>
@@ -796,7 +890,7 @@ function renderFeed() {
                 <img src="${post.image}" alt="${post.dishName}" class="post-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
             </div>
             <div class="post-body">
-                <div class="post-stars-rating">${'★'.repeat(post.rating)}${'☆'.repeat(5 - post.rating)}</div>
+                <div class="post-tags-container">${tagsHtml}</div>
                 <h3 class="post-dish-name">${post.dishName}</h3>
                 <p class="post-comment">${post.comment}</p>
                 <div class="post-footer">
@@ -858,15 +952,12 @@ function handleFormSubmit(e) {
     const mealCategory = document.getElementById('mealCategory').value;
     const comment = document.getElementById('comment').value;
     
-    // Read star rating
-    let rating = 3;
-    const starRadios = document.getElementsByName('rating');
-    for (let radio of starRadios) {
-        if (radio.checked) {
-            rating = parseInt(radio.value);
-            break;
-        }
-    }
+    const mealGenre = document.getElementById('mealGenre').value;
+    const mealTaste = document.getElementById('mealTaste').value;
+    const mealFocus = document.getElementById('mealFocus').value;
+
+    const checkedBoxes = document.querySelectorAll('input[name="mealIngredients"]:checked');
+    const mealIngredients = Array.from(checkedBoxes).map(cb => cb.value);
 
     // Default image if none uploaded
     let mealImage = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60";
@@ -886,9 +977,13 @@ function handleFormSubmit(e) {
                 dishName: dishName,
                 mealType: mealType,
                 category: mealCategory,
-                rating: rating,
+                rating: 3,
                 comment: comment,
-                image: mealImage
+                image: mealImage,
+                genre: mealGenre,
+                taste: mealTaste,
+                ingredients: mealIngredients,
+                focus: mealFocus
             }).then(() => {
                 addMealModal.classList.remove('active');
                 editingPostId = null;
@@ -902,9 +997,13 @@ function handleFormSubmit(e) {
                 post.dishName = dishName;
                 post.mealType = mealType;
                 post.category = mealCategory;
-                post.rating = rating;
+                post.rating = 3;
                 post.comment = comment;
                 post.image = mealImage;
+                post.genre = mealGenre;
+                post.taste = mealTaste;
+                post.ingredients = mealIngredients;
+                post.focus = mealFocus;
             }
             localStorage.setItem('what-i-ate-posts', JSON.stringify(posts));
             addMealModal.classList.remove('active');
@@ -921,9 +1020,13 @@ function handleFormSubmit(e) {
         dishName: dishName,
         mealType: mealType,
         category: mealCategory,
-        rating: rating,
+        rating: 3,
         comment: comment,
         image: mealImage,
+        genre: mealGenre,
+        taste: mealTaste,
+        ingredients: mealIngredients,
+        focus: mealFocus,
         deliciousCount: 0
     };
 
@@ -1091,11 +1194,21 @@ function handleEditPostClick(postId, event) {
     document.getElementById('mealCategory').value = post.category;
     document.getElementById('comment').value = post.comment;
     
-    // 星評価ラジオボタンを設定
-    const starRadios = document.getElementsByName('rating');
-    for (let radio of starRadios) {
-        radio.checked = (parseInt(radio.value) === post.rating);
-    }
+    // Gachaタグ項目を設定
+    document.getElementById('mealGenre').value = post.genre || 'all';
+    document.getElementById('mealTaste').value = post.taste || 'all';
+    document.getElementById('mealFocus').value = post.focus || 'all';
+    
+    // 食材チェックボックスを設定
+    const ingredientBoxes = document.querySelectorAll('input[name="mealIngredients"]');
+    ingredientBoxes.forEach(cb => {
+        cb.checked = false;
+        if (Array.isArray(post.ingredients)) {
+            cb.checked = post.ingredients.includes(cb.value);
+        } else if (post.ingredient) {
+            cb.checked = (post.ingredient === cb.value);
+        }
+    });
     
     // 画像プレビューを設定
     imagePreview.src = post.image;
@@ -1123,7 +1236,33 @@ function openDetailModal(postId) {
     detailCategory.className = `detail-badge secondary cat-${post.category}`;
     detailTime.textContent = formatDate(post.date);
     detailTitle.textContent = post.dishName;
-    detailStarsInner.style.width = `${post.rating * 20}%`;
+    // Populate Tags list
+    let tagsHtml = '';
+    tagsHtml += `<span class="post-tag-badge style">${getCategoryLabel(post.category)}</span>`;
+    
+    if (post.genre && post.genre !== 'all') {
+        const labels = { japanese: '和風 🇯🇵', western: '洋風 🍔', other: 'その他 🍛' };
+        tagsHtml += `<span class="post-tag-badge genre">${labels[post.genre] || post.genre}</span>`;
+    }
+    if (post.taste && post.taste !== 'all') {
+        const labels = { light: 'あっさり 🥗', heavy: 'ガッツリ 🍖' };
+        tagsHtml += `<span class="post-tag-badge taste">${labels[post.taste] || post.taste}</span>`;
+    }
+    if (Array.isArray(post.ingredients) && post.ingredients.length > 0) {
+        const labels = { pork: '豚 🐷', chicken: '鶏 🐔', beef: '牛 🐮', seafood: '魚介 🐟', other: 'その他 🥕' };
+        post.ingredients.forEach(ing => {
+            tagsHtml += `<span class="post-tag-badge ingredient">${labels[ing] || ing}</span>`;
+        });
+    } else if (post.ingredient && post.ingredient !== 'all') {
+        const labels = { pork: '豚 🐷', chicken: '鶏 🐔', beef: '牛 🐮', seafood: '魚介 🐟', other: 'その他 🥕' };
+        tagsHtml += `<span class="post-tag-badge ingredient">${labels[post.ingredient] || post.ingredient}</span>`;
+    }
+    if (post.focus && post.focus !== 'all') {
+        const labels = { quick: '時短 ⏱️', budget: '節約 🪙' };
+        tagsHtml += `<span class="post-tag-badge focus">${labels[post.focus] || post.focus}</span>`;
+    }
+    
+    detailTagsContainer.innerHTML = tagsHtml;
     detailComment.textContent = post.comment || "メモはありません。";
 
     // Populate Author Profile Card
@@ -1260,7 +1399,7 @@ function renderUserHomePosts(targetUserId) {
         const card = document.createElement('div');
         card.className = 'post-card';
         
-        const starsHtml = '★'.repeat(post.rating) + '☆'.repeat(5 - post.rating);
+        const tagsHtml = getPostTagsHtml(post);
         const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
         const avatarHtml = isCustomImage 
             ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
@@ -1290,7 +1429,6 @@ function renderUserHomePosts(targetUserId) {
                     <span class="post-time">${formatDate(post.date)}</span>
                     <div class="post-badges">
                         <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
-                        <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
                         ${actionButtonsHtml}
                     </div>
                 </div>
@@ -1299,10 +1437,8 @@ function renderUserHomePosts(targetUserId) {
                 <img src="${post.image}" class="post-img" alt="${post.dishName}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
             </div>
             <div class="post-body">
-                <div class="post-title-row">
-                    <h3 class="post-dish-name">${post.dishName}</h3>
-                    <div class="post-stars">${starsHtml}</div>
-                </div>
+                <div class="post-tags-container">${tagsHtml}</div>
+                <h3 class="post-dish-name" style="margin-top: 4px; margin-bottom: 8px;">${post.dishName}</h3>
                 <p class="post-comment">${post.comment || 'メモはありません。'}</p>
                 <div class="post-actions">
                     <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
@@ -1547,7 +1683,7 @@ function renderLikes() {
         card.className = 'post-card';
         
         // Stars HTML
-        const starsHtml = '★'.repeat(post.rating) + '☆'.repeat(5 - post.rating);
+        const tagsHtml = getPostTagsHtml(post);
         
         // Check custom profile image
         const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
@@ -1577,7 +1713,6 @@ function renderLikes() {
                     <span class="post-time">${formatDate(post.date)}</span>
                     <div class="post-badges">
                         <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
-                        <span class="post-badge cat-${post.category}">${getCategoryLabel(post.category)}</span>
                         ${actionButtonsHtml}
                     </div>
                 </div>
@@ -1586,10 +1721,8 @@ function renderLikes() {
                 <img src="${post.image}" class="post-img" alt="${post.dishName}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
             </div>
             <div class="post-body">
-                <div class="post-title-row">
-                    <h3 class="post-dish-name">${post.dishName}</h3>
-                    <div class="post-stars">${starsHtml}</div>
-                </div>
+                <div class="post-tags-container">${tagsHtml}</div>
+                <h3 class="post-dish-name" style="margin-top: 4px; margin-bottom: 8px;">${post.dishName}</h3>
                 <p class="post-comment">${post.comment || 'メモはありません。'}</p>
                 <div class="post-actions">
                     <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
@@ -1754,20 +1887,37 @@ function useRecipeForMeal() {
 
     const dishNameInput = document.getElementById('dishName');
     const commentInput = document.getElementById('comment');
-    const ratingInput = document.getElementById('rating');
     const mealTypeSelect = document.getElementById('mealType');
-    const categorySelect = document.getElementById('category');
+    const categorySelect = document.getElementById('mealCategory');
     const imagePreview = document.getElementById('imagePreview');
 
     dishNameInput.value = currentSelectedRecipe.title;
     commentInput.value = `YouTubeで「${currentSelectedRecipe.creator}」さんの人気レシピ動画を観て作りました！🎬✨`;
-    ratingInput.value = "5";
     mealTypeSelect.value = "dinner";
     categorySelect.value = "self-cooked";
+
+    // Gachaタグを自動セット
+    document.getElementById('mealGenre').value = currentSelectedRecipe.style || 'all';
+    document.getElementById('mealTaste').value = currentSelectedRecipe.taste || 'all';
+    document.getElementById('mealFocus').value = currentSelectedRecipe.focus || 'all';
+
+    // 食材チェックボックスを自動チェック
+    const ingredientBoxes = document.querySelectorAll('input[name="mealIngredients"]');
+    ingredientBoxes.forEach(cb => {
+        cb.checked = false;
+        if (Array.isArray(currentSelectedRecipe.ingredients)) {
+            cb.checked = currentSelectedRecipe.ingredients.includes(cb.value);
+        } else if (currentSelectedRecipe.ingredient) {
+            cb.checked = (currentSelectedRecipe.ingredient === cb.value);
+        }
+    });
 
     const ytThumbnailUrl = `https://img.youtube.com/vi/${currentSelectedRecipe.id}/hqdefault.jpg`;
     imagePreview.src = ytThumbnailUrl;
     imagePreview.style.display = 'block';
+
+    const dropzoneText = document.getElementById('dropzoneText');
+    if (dropzoneText) dropzoneText.style.display = 'none';
 }
 
 // --- Extract 11-char YouTube ID from URL or ID string ---
@@ -2017,7 +2167,7 @@ function getCategoryLabel(cat) {
     switch (cat) {
         case 'self-cooked': return '自炊';
         case 'eating-out': return '外食';
-        case 'takeout': return 'テイクアウト';
+        case 'takeout': return '出来合い';
         default: return 'その他';
     }
 }

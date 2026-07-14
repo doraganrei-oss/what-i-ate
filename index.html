@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=2.19">
+    <link rel="stylesheet" href="styles.css?v=2.20">
 </head>
 <body>
     <div class="app-container">
@@ -64,14 +64,79 @@
         <main class="app-content">
             <!-- Timeline Section -->
             <section id="tab-timeline" class="tab-panel active">
-                <div class="timeline-header">
-                    <h2>みんなのごはんフィード</h2>
-                    <div class="filter-bar">
-                        <button class="filter-btn active" data-filter="all">すべて</button>
-                        <button class="filter-btn" data-filter="morning">朝食</button>
-                        <button class="filter-btn" data-filter="lunch">昼食</button>
-                        <button class="filter-btn" data-filter="dinner">夕食</button>
-                        <button class="filter-btn" data-filter="snack">おやつ</button>
+                <div class="timeline-header-panel">
+                    <div class="timeline-title-row">
+                        <h2>みんなのごはんフィード 🍽️</h2>
+                    </div>
+                    
+                    <div class="timeline-filter-dashboard">
+                        <div class="filter-bar" id="timelineMealTypeFilters">
+                            <button class="filter-btn active" data-filter="all">すべて</button>
+                            <button class="filter-btn" data-filter="morning">朝食</button>
+                            <button class="filter-btn" data-filter="lunch">昼食</button>
+                            <button class="filter-btn" data-filter="dinner">夕食</button>
+                            <button class="filter-btn" data-filter="snack">おやつ</button>
+                        </div>
+                        
+                        <div class="timeline-filter-selects-grid">
+                            <div class="select-wrapper">
+                                <label for="timelineStyleFilter">スタイル</label>
+                                <select id="timelineStyleFilter">
+                                    <option value="all">すべて 🌐</option>
+                                    <option value="self-cooked">自炊 🍳</option>
+                                    <option value="eating-out">外食 🍔</option>
+                                    <option value="takeout">出来合い 🍱</option>
+                                </select>
+                            </div>
+                            
+                            <div class="select-wrapper">
+                                <label for="timelineGenreFilter">ジャンル</label>
+                                <select id="timelineGenreFilter">
+                                    <option value="all">すべて 🌐</option>
+                                    <option value="japanese">和風 🇯🇵</option>
+                                    <option value="western">洋風 🍔</option>
+                                    <option value="other">中華・その他 🍛</option>
+                                </select>
+                            </div>
+                            
+                            <div class="select-wrapper">
+                                <label for="timelineTasteFilter">味の傾向</label>
+                                <select id="timelineTasteFilter">
+                                    <option value="all">すべて 🌐</option>
+                                    <option value="light">あっさり 🥗</option>
+                                    <option value="heavy">ガッツリ 🍖</option>
+                                </select>
+                            </div>
+                            
+                            <div class="select-wrapper">
+                                <label for="timelineIngredientFilter">食材</label>
+                                <select id="timelineIngredientFilter">
+                                    <option value="all">すべて 🌐</option>
+                                    <option value="pork">豚 🐷</option>
+                                    <option value="chicken">鶏 🐔</option>
+                                    <option value="beef">牛 🐮</option>
+                                    <option value="seafood">魚介 🐟</option>
+                                    <option value="other">その他 🥕</option>
+                                </select>
+                            </div>
+                            
+                            <div class="select-wrapper">
+                                <label for="timelineFocusFilter">こだわり</label>
+                                <select id="timelineFocusFilter">
+                                    <option value="all">すべて 🌐</option>
+                                    <option value="quick">時短 ⏱️</option>
+                                    <option value="budget">節約 🪙</option>
+                                </select>
+                            </div>
+                            
+                            <div class="select-wrapper highlight">
+                                <label for="timelineSortFilter">並び替え</label>
+                                <select id="timelineSortFilter">
+                                    <option value="newest">最新順 📅</option>
+                                    <option value="popular">おいしそう順 ❤️</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="feed-grid" id="feedGrid">
@@ -334,20 +399,59 @@
                             <select id="mealCategory" required>
                                 <option value="self-cooked" selected>🍳 自炊</option>
                                 <option value="eating-out">🍔 外食</option>
-                                <option value="takeout">🍱 テイクアウト/お惣菜</option>
+                                <option value="takeout">🍱 出来合い</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Star Rating -->
-                    <div class="form-group">
-                        <label>美味しさ評価</label>
-                        <div class="star-rating-input">
-                            <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="最高！">★</label>
-                            <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="美味しい">★</label>
-                            <input type="radio" id="star3" name="rating" value="3" checked><label for="star3" title="普通">★</label>
-                            <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="いまいち">★</label>
-                            <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="うーん">★</label>
+                    <!-- Tags: Genre & Taste & Ingredients & Focus (To match Gacha) -->
+                    <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 12px;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label for="mealGenre" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">ジャンル *</label>
+                            <select id="mealGenre" required style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                <option value="all" selected>指定なし / その他 🍲</option>
+                                <option value="japanese">和風 🇯🇵</option>
+                                <option value="western">洋風 🍔</option>
+                                <option value="other">中華・エスニック等 🍛</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label for="mealTaste" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">味の傾向 *</label>
+                            <select id="mealTaste" required style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                <option value="all" selected>指定なし 🌐</option>
+                                <option value="light">あっさり 🥗</option>
+                                <option value="heavy">ガッツリ 🍖</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 12px;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">食材 (複数選択可)</label>
+                            <div class="checkbox-group" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; background-color: #FFF; padding: 6px 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-sizing: border-box; font-size: 10px; line-height: 1.2;">
+                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0;">
+                                    <input type="checkbox" name="mealIngredients" value="pork" style="cursor: pointer;"> 豚 🐷
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0;">
+                                    <input type="checkbox" name="mealIngredients" value="chicken" style="cursor: pointer;"> 鶏 🐔
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0;">
+                                    <input type="checkbox" name="mealIngredients" value="beef" style="cursor: pointer;"> 牛 🐮
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0;">
+                                    <input type="checkbox" name="mealIngredients" value="seafood" style="cursor: pointer;"> 魚介 🐟
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0; grid-column: span 2;">
+                                    <input type="checkbox" name="mealIngredients" value="other" style="cursor: pointer;"> その他 🥕
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label for="mealFocus" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">こだわり *</label>
+                            <select id="mealFocus" required style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
+                                <option value="all" selected>指定なし 🌐</option>
+                                <option value="quick">時短 ⏱️</option>
+                                <option value="budget">節約 🪙</option>
+                            </select>
                         </div>
                     </div>
 
@@ -377,11 +481,7 @@
                         <span class="detail-time" id="detailTime">2026-07-02</span>
                     </div>
                     <h2 id="detailTitle">料理名</h2>
-                    <div class="detail-stars">
-                        <div class="stars-outer">
-                            <div class="stars-inner" id="detailStarsInner" style="width: 80%"></div>
-                        </div>
-                    </div>
+                    <div class="detail-tags-container" id="detailTagsContainer" style="display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px 0;"></div>
                     <p class="detail-comment" id="detailComment">コメント</p>
 
                     <!-- Author Profile Card -->
@@ -530,6 +630,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.19"></script>
+    <script src="app.js?v=2.20"></script>
 </body>
 </html>
