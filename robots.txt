@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://doraganrei-oss.github.io/what-i-ate/sitemap.xml
