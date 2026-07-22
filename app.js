@@ -1820,6 +1820,9 @@ function loadSharedRecipes() {
 }
 
 // --- Spin Gacha Action (with filters and YouTube embed) ---
+let drawnGachaHistory = [];
+let editingRecipeId = null;
+
 function spinGacha() {
     if (gachaLever.classList.contains('pulled')) return;
 
@@ -1849,6 +1852,15 @@ function spinGacha() {
         return;
     }
 
+    // すでに引いた動画を排除
+    let availableCandidates = candidates.filter(r => !drawnGachaHistory.includes(r.id));
+    
+    // もしフィルター条件に合う動画をすべて引ききった場合、履歴をリセットして最初から選び直す
+    if (availableCandidates.length === 0) {
+        drawnGachaHistory = [];
+        availableCandidates = candidates;
+    }
+
     gachaLever.classList.add('pulled');
     gachaResultCard.style.display = 'none';
     gachaYoutubeIframe.src = "";
@@ -1859,7 +1871,8 @@ function spinGacha() {
     rollingText.textContent = "🍳 🍜 🥞 🍣 🍛 🍔 🍱";
     gachaScreenContent.appendChild(rollingText);
 
-    const recipe = candidates[Math.floor(Math.random() * candidates.length)];
+    const recipe = availableCandidates[Math.floor(Math.random() * availableCandidates.length)];
+    drawnGachaHistory.push(recipe.id);
     currentSelectedRecipe = recipe;
 
     setTimeout(() => {
@@ -1958,17 +1971,19 @@ function handleRegisterRecipe(e) {
         return;
     }
 
-    const videoId = extractYoutubeId(rawUrl);
+    const videoId = editingRecipeId ? editingRecipeId : extractYoutubeId(rawUrl);
     if (!videoId) {
         alert("有効なYouTubeの動画URLまたは11桁の動画IDを入力してください。");
         return;
     }
 
-    // Duplicate Check Validation
-    const isDuplicate = youtubeRecipes.some(r => r.id === videoId);
-    if (isDuplicate) {
-        alert("この動画は既にガチャに登録されています！");
-        return;
+    // Duplicate Check Validation (Skip if editing)
+    if (!editingRecipeId) {
+        const isDuplicate = youtubeRecipes.some(r => r.id === videoId);
+        if (isDuplicate) {
+            alert("この動画は既にガチャに登録されています！");
+            return;
+        }
     }
 
     const newRecipe = {
@@ -2024,12 +2039,17 @@ function onRecipeAddSuccess(recipe) {
         youtubeRecipes = youtubeRecipes.map(r => r.id === recipe.id ? recipe : r);
     }
 
-    addRecipeForm.reset();
-    
+    const isEditMode = (editingRecipeId !== null);
+    stopEditingRecipe(); // Resets form, clears editingRecipeId, restores buttons
+
     // Refresh the custom list display
     loadSharedRecipes();
 
-    showToastNotification(`「${recipe.title}」を追加登録しました！🎉`);
+    if (isEditMode) {
+        showToastNotification(`「${recipe.title}」の情報を更新しました！💾`);
+    } else {
+        showToastNotification(`「${recipe.title}」を追加登録しました！🎉`);
+    }
 }
 
 // --- Render custom recipe list inside the accordion ---
@@ -2050,15 +2070,97 @@ function renderCustomRecipeList(customList) {
                 <span class="custom-recipe-title">${recipe.title}</span>
                 <span class="custom-recipe-creator">${recipe.creator || '紹介者不明'}</span>
             </div>
-            <button class="delete-recipe-btn" data-id="${recipe.id}">削除 🗑️</button>
+            <div class="custom-recipe-actions">
+                <button class="edit-recipe-btn" data-id="${recipe.id}">編集 ✏️</button>
+                <button class="delete-recipe-btn" data-id="${recipe.id}">削除 🗑️</button>
+            </div>
         `;
         customRecipesList.appendChild(item);
+
+        // Bind edit action
+        item.querySelector('.edit-recipe-btn').addEventListener('click', () => {
+            startEditingRecipe(recipe);
+        });
 
         // Bind delete action
         item.querySelector('.delete-recipe-btn').addEventListener('click', () => {
             handleDeleteRecipe(recipe.id, recipe.title);
         });
     });
+}
+
+// --- Edit custom recipe functions ---
+function startEditingRecipe(recipe) {
+    editingRecipeId = recipe.id;
+    
+    // Populate form inputs
+    recipeUrlInput.value = recipe.id;
+    recipeUrlInput.disabled = true; // Disable modifying video ID during edit
+    recipeTitleInput.value = recipe.title;
+    recipeCreatorInput.value = recipe.creator || '';
+    recipeStyleSelect.value = recipe.style || 'all';
+    recipeTasteSelect.value = recipe.taste || 'all';
+    recipeFocusSelect.value = recipe.focus || 'all';
+
+    // Populate ingredient checkboxes
+    const checkboxes = document.querySelectorAll('input[name="recipeIngredients"]');
+    checkboxes.forEach(cb => {
+        if (Array.isArray(recipe.ingredients)) {
+            cb.checked = recipe.ingredients.includes(cb.value);
+        } else if (recipe.ingredient) {
+            cb.checked = (recipe.ingredient === cb.value);
+        } else {
+            cb.checked = false;
+        }
+    });
+
+    // Make sure Gacha Manager Accordion is expanded
+    if (gachaManagerAccordion && !gachaManagerAccordion.classList.contains('open')) {
+        gachaManagerAccordion.classList.add('open');
+    }
+
+    // Scroll smoothly to Gacha manager form
+    gachaManagerAccordion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Update submit button text and styling
+    const submitBtn = addRecipeForm.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.textContent = "変更を保存する 💾";
+        submitBtn.style.background = "linear-gradient(135deg, #FF7E40, #FF5500)";
+    }
+
+    // Append cancel button if not already present
+    let cancelBtn = document.getElementById('cancelEditRecipeBtn');
+    if (!cancelBtn && submitBtn) {
+        cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.id = 'cancelEditRecipeBtn';
+        cancelBtn.className = 'gacha-btn secondary';
+        cancelBtn.textContent = '編集をキャンセル ❌';
+        cancelBtn.style.cssText = 'margin-top: 8px; width: 100%; padding: 12px; background: #eee; color: #555; border: 1px solid #ddd; font-weight: bold; border-radius: var(--radius-md); cursor: pointer;';
+        submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+        
+        cancelBtn.addEventListener('click', stopEditingRecipe);
+    }
+}
+
+function stopEditingRecipe() {
+    editingRecipeId = null;
+    addRecipeForm.reset();
+    recipeUrlInput.disabled = false;
+
+    // Restore submit button
+    const submitBtn = addRecipeForm.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.textContent = "ガチャに新レシピを登録する ✨";
+        submitBtn.style.background = ""; // Restore default CSS styling
+    }
+
+    // Remove cancel button
+    const cancelBtn = document.getElementById('cancelEditRecipeBtn');
+    if (cancelBtn) {
+        cancelBtn.remove();
+    }
 }
 
 // --- Delete recipe from Gacha list ---
