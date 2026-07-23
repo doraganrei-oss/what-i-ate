@@ -35,7 +35,12 @@ try {
 // ==========================================================================
 // Application State & Rebranding Admin Settings
 // ==========================================================================
-const ADMIN_EMAILS = ['doraganrei.oss@gmail.com', 'reido.doraganrei@gmail.com', 'reido.oss@gmail.com'];
+const ADMIN_EMAILS = [
+    'doraganrei@gmail.com',
+    'doraganrei.oss@gmail.com',
+    'reido.doraganrei@gmail.com',
+    'reido.oss@gmail.com'
+];
 
 function isAdmin() {
     return currentUser && 
