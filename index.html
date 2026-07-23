@@ -2,54 +2,20 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Search Console Verification -->
-    <meta name="google-site-verification" content="MVt5srxMhpq7rLiJtJPkJOu2F1b-6dKLZBeaKIbvOLg" />
-    <title>きょう何食べた？｜みんなのご飯を見て今日の献立を考えよう</title>
-    <meta name="description" content="みんなが今日食べたご飯や料理を投稿・共有。朝ごはん、昼ごはん、晩ご飯の献立選びや料理のアイデア探しに役立つ無料サービスです。">
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://doraganrei-oss.github.io/what-i-ate/">
-
-    <!-- OGP Settings -->
-    <meta property="og:site_name" content="きょう何食べた？">
-    <meta property="og:title" content="きょう何食べた？ | 毎日のごはん記録＆シェア">
-    <meta property="og:description" content="きょう食べたごはんを簡単に記録・共有できる温かみのあるフードログアプリです。毎日の献立決めを楽しく助ける「献立ガチャ」機能も搭載！">
-    <meta property="og:image" content="https://doraganrei-oss.github.io/what-i-ate/images/omurice.jpg">
-    <meta property="og:url" content="https://doraganrei-oss.github.io/what-i-ate/">
-    <meta property="og:type" content="website">
-
-    <!-- Twitter Card Settings -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="きょう何食べた？ | 毎日のごはん記録＆シェア">
-    <meta name="twitter:description" content="毎日のごはん記録＆献立ガチャアプリ。今日のごはんを記録してシェアしよう！">
-    <meta name="twitter:image" content="https://doraganrei-oss.github.io/what-i-ate/images/omurice.jpg">
-
-    <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "きょう何食べた？",
-      "url": "https://doraganrei-oss.github.io/what-i-ate/",
-      "description": "みんなが今日食べたご飯や料理を投稿・共有し、今日の献立選びの参考になる料理共有サイトです。",
-      "inLanguage": "ja"
-    }
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>きょう何食べた？ | 料理動画キュレーション ＆ 献立ガチャ</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=3.00">
+    <link rel="stylesheet" href="styles.css?v=3.90">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-2V65GWTWRE"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-2V65GWTWRE');
     </script>
 </head>
@@ -57,47 +23,44 @@
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
-            <div class="logo-area">
-                <span class="logo-emoji">🍳</span>
+            <div class="logo-area" style="display: flex; align-items: center; gap: 8px;">
+                <div class="foodtube-logo-icon" style="background-color: #FF0000; width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(255,0,0,0.3);">
+                    <span style="font-size: 22px; color: #FFF; line-height: 1;">🍳</span>
+                </div>
                 <div class="logo-text">
-                    <div style="font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; line-height: 1.2;">きょう何食べた？</div>
-                    <h1 style="font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; margin: 0; text-transform: none;">みんなのご飯を見て今日の献立を考えよう</h1>
+                    <h1 style="font-family: 'Outfit', 'Noto Sans JP', sans-serif; font-weight: 800; font-size: 21px; display: flex; align-items: center; margin: 0; line-height: 1.1; letter-spacing: -0.5px;">
+                        <span style="color: var(--text-main);">Food</span><span style="color: #FFF; background-color: #FF0000; padding: 1px 5px; border-radius: 5px; margin-left: 2px; font-size: 19px;">Tube</span>
+                    </h1>
+                    <p style="font-size: 9px; color: var(--text-muted); margin: 1px 0 0 0; font-weight: 600; letter-spacing: 0.5px;">料理動画キュレーション ＆ ガチャ</p>
                 </div>
             </div>
             <div class="header-right">
+                <!-- Login widget (dynamic) -->
+                <button class="header-login-btn" id="headerLoginBtn">ログイン</button>
                 <div class="user-profile-header" id="userProfileHeader" style="display: none;">
-                    <div id="userProfileActive" style="display: flex; align-items: center; gap: 8px;">
-                        <img id="userHeaderAvatar" class="user-header-avatar" src="" alt="プロフ">
-                        <span id="userHeaderName" class="user-header-name">ゲスト</span>
-                        <button id="editProfileBtn" class="header-action-btn" title="プロフ編集">⚙️</button>
-                        <button id="logoutBtn" class="header-action-btn" title="ログアウト">🚪</button>
-                    </div>
-                    <button id="headerLoginBtn" class="header-login-btn" style="display: none;">ログイン</button>
-                </div>
-                <div class="streak-badge" id="streakBadge" title="連続で投稿した日数">
-                    <span class="streak-icon">🔥</span>
-                    <span class="streak-count" id="streakCount">0</span>日連続
+                    <img src="https://via.placeholder.com/150" alt="Avatar" class="user-header-avatar" id="userHeaderAvatar">
+                    <span class="user-header-name" id="userHeaderName">ゲスト</span>
                 </div>
             </div>
         </header>
 
-        <!-- Main Navigation Tabs -->
+        <!-- Desktop App Navigation (Hidden on mobile) -->
         <nav class="app-nav">
             <button class="nav-tab active" data-tab="timeline">
                 <span class="nav-icon">🕒</span>
-                <span class="nav-label">タイムライン</span>
-            </button>
-            <button class="nav-tab" data-tab="calendar">
-                <span class="nav-icon">📅</span>
-                <span class="nav-label">カレンダー</span>
-            </button>
-            <button class="nav-tab" data-tab="likes">
-                <span class="nav-icon">💛</span>
-                <span class="nav-label">お気に入り</span>
+                <span class="nav-label">フィード</span>
             </button>
             <button class="nav-tab" data-tab="gacha">
                 <span class="nav-icon">🎰</span>
                 <span class="nav-label">献立ガチャ</span>
+            </button>
+            <button class="nav-tab" data-tab="recommend">
+                <span class="nav-icon">📢</span>
+                <span class="nav-label">おすすめ</span>
+            </button>
+            <button class="nav-tab" data-tab="likes">
+                <span class="nav-icon">💛</span>
+                <span class="nav-label">お気に入り</span>
             </button>
         </nav>
 
@@ -107,287 +70,202 @@
             <section id="tab-timeline" class="tab-panel active">
                 <div class="timeline-header-panel">
                     <div class="timeline-title-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <h2 style="margin: 0;">みんなのごはんフィード 🍽️</h2>
-                        <div class="view-toggle-buttons" style="display: flex; gap: 4px;">
-                            <button class="view-toggle-btn active" id="timelineListViewBtn" title="フィード表示" style="background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm);">☰</button>
-                            <button class="view-toggle-btn" id="timelineGridViewBtn" title="グリッド表示" style="background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm);">田</button>
-                        </div>
+                        <h2 style="margin: 0;">おすすめレシピ動画 🍽️</h2>
+                        <button class="view-toggle-btn" id="timelineFilterToggleBtn" style="font-size: 11px; font-weight: 800; padding: 6px 10px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 4px; border: 1px solid var(--border-color); cursor: pointer;">🔍 フィルター</button>
                     </div>
                     
-                    <div class="timeline-filter-dashboard">
-                        <div class="filter-bar" id="timelineMealTypeFilters">
-                            <button class="filter-btn active" data-filter="all">すべて</button>
-                            <button class="filter-btn" data-filter="morning">朝食</button>
-                            <button class="filter-btn" data-filter="lunch">昼食</button>
-                            <button class="filter-btn" data-filter="dinner">夕食</button>
-                            <button class="filter-btn" data-filter="snack">おやつ</button>
+                    <!-- Search Input Field (FoodTube Hybrid search) -->
+                    <div class="search-bar-container" style="margin-top: 10px; margin-bottom: 6px; position: relative; width: 100%;">
+                        <input type="text" id="recipeSearchInput" placeholder="料理名、チャンネル、タグ、食材・材料で検索..." style="width: 100%; padding: 8px 12px 8px 34px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 12px; background: var(--bg-main); color: var(--text-main); transition: border-color 0.2s ease;">
+                        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-muted); pointer-events: none;">🔍</span>
+                    </div>
+                    
+                    <!-- Collapsible Filter Dashboard -->
+                    <div class="timeline-filter-dashboard collapsed" id="timelineFilterDashboard" style="padding: 12px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border-color);">
+                        <div class="filter-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">タグで絞り込む (複数選択可)</span>
+                            <div class="select-wrapper" style="margin: 0;">
+                                <select id="filterSort" style="padding: 6px 12px; font-size: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main);">
+                                    <option value="newest">新しい順</option>
+                                    <option value="likes">美味しそう！順</option>
+                                </select>
+                            </div>
                         </div>
-                        
-                        <div class="timeline-filter-selects-grid">
-                            <div class="select-wrapper">
-                                <label for="timelineStyleFilter">スタイル</label>
-                                <select id="timelineStyleFilter">
-                                    <option value="all">すべて 🌐</option>
-                                    <option value="self-cooked">自炊 🍳</option>
-                                    <option value="eating-out">外食 🍔</option>
-                                    <option value="takeout">出来合い 🍱</option>
-                                </select>
-                            </div>
-                            
-                            <div class="select-wrapper">
-                                <label for="timelineGenreFilter">ジャンル</label>
-                                <select id="timelineGenreFilter">
-                                    <option value="all">すべて 🌐</option>
-                                    <option value="japanese">和風 🇯🇵</option>
-                                    <option value="western">洋風 🍔</option>
-                                    <option value="other">中華・その他 🍛</option>
-                                </select>
-                            </div>
-                            
-                            <div class="select-wrapper">
-                                <label for="timelineTasteFilter">味の傾向</label>
-                                <select id="timelineTasteFilter">
-                                    <option value="all">すべて 🌐</option>
-                                    <option value="light">あっさり 🥗</option>
-                                    <option value="heavy">ガッツリ 🍖</option>
-                                </select>
-                            </div>
-                            
-                            <div class="select-wrapper">
-                                <label for="timelineIngredientFilter">食材</label>
-                                <select id="timelineIngredientFilter">
-                                    <option value="all">すべて 🌐</option>
-                                    <option value="pork">豚 🐷</option>
-                                    <option value="chicken">鶏 🐔</option>
-                                    <option value="beef">牛 🐮</option>
-                                    <option value="seafood">魚介 🐟</option>
-                                    <option value="other">その他 🥕</option>
-                                </select>
-                            </div>
-                            
-                            <div class="select-wrapper">
-                                <label for="timelineFocusFilter">こだわり</label>
-                                <select id="timelineFocusFilter">
-                                    <option value="all">すべて 🌐</option>
-                                    <option value="quick">時短 ⏱️</option>
-                                    <option value="budget">節約 🪙</option>
-                                </select>
-                            </div>
-                            
-                            <div class="select-wrapper highlight">
-                                <label for="timelineSortFilter">並び替え</label>
-                                <select id="timelineSortFilter">
-                                    <option value="newest">最新順 📅</option>
-                                    <option value="popular">おいしそう順 ❤️</option>
-                                </select>
-                            </div>
+                        <div class="filter-tag-chips-container" id="timelineTagChips" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            <!-- ジャンル -->
+                            <button class="tag-chip" data-tag="和風">和風</button>
+                            <button class="tag-chip" data-tag="洋風">洋風</button>
+                            <button class="tag-chip" data-tag="中華">中華</button>
+                            <button class="tag-chip" data-tag="その他海外料理">海外料理</button>
+                            <!-- メイン食材 -->
+                            <button class="tag-chip" data-tag="野菜">野菜</button>
+                            <button class="tag-chip" data-tag="豚">豚</button>
+                            <button class="tag-chip" data-tag="牛">牛</button>
+                            <button class="tag-chip" data-tag="鶏">鶏</button>
+                            <button class="tag-chip" data-tag="挽肉">挽肉</button>
+                            <button class="tag-chip" data-tag="魚介">魚介</button>
+                            <button class="tag-chip" data-tag="卵">卵</button>
+                            <!-- 料理タイプ -->
+                            <button class="tag-chip" data-tag="サラダ">サラダ</button>
+                            <button class="tag-chip" data-tag="スープ鍋">スープ鍋</button>
+                            <button class="tag-chip" data-tag="ご飯物">ご飯物</button>
+                            <button class="tag-chip" data-tag="麺">麺</button>
+                            <!-- 特徴 -->
+                            <button class="tag-chip" data-tag="ガッツリ">ガッツリ</button>
+                            <button class="tag-chip" data-tag="あっさり">あっさり</button>
+                            <button class="tag-chip" data-tag="温">温</button>
+                            <button class="tag-chip" data-tag="冷">冷</button>
+                            <button class="tag-chip" data-tag="節約">節約</button>
+                            <button class="tag-chip" data-tag="時短">時短</button>
                         </div>
                     </div>
                 </div>
-                <div class="feed-grid" id="feedGrid">
-                    <!-- Posts will be generated dynamically by JS -->
+
+                <!-- Feed Output Area -->
+                <div class="feed-container" id="timelineFeed">
+                    <!-- Dynamically populated card feed -->
+                </div>
+
+                <!-- Grid Album Output Area (Hidden by default) -->
+                <div class="posts-grid-view" id="timelineGrid" style="display: none;">
+                    <!-- Dynamically populated 3-column album grid -->
                 </div>
             </section>
 
-            <!-- Calendar Section -->
-            <section id="tab-calendar" class="tab-panel">
-                <div class="calendar-container">
-                    <div class="calendar-header">
-                        <button id="prevMonth" class="cal-nav-btn">&lt;</button>
-                        <h2 id="calendarTitle">2026年 7月</h2>
-                        <button id="nextMonth" class="cal-nav-btn">&gt;</button>
-                    </div>
-                    <div class="calendar-grid">
-                        <div class="weekday">日</div>
-                        <div class="weekday">月</div>
-                        <div class="weekday">火</div>
-                        <div class="weekday">水</div>
-                        <div class="weekday">木</div>
-                        <div class="weekday">金</div>
-                        <div class="weekday">土</div>
-                    </div>
-                    <div class="calendar-days" id="calendarDays">
-                        <!-- Days will be generated dynamically by JS -->
-                    </div>
-                </div>
-            </section>
+             <!-- Everyone's Recommendations Section -->
+             <section id="tab-recommend" class="tab-panel">
+                 <div class="timeline-header-panel">
+                     <div class="timeline-title-row">
+                         <h2 style="margin: 0;">みんなのおすすめ 📢</h2>
+                     </div>
+                     <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 10px 0;">YouTubeショートの美味しそうなレシピ動画をみんなで共有しよう！</p>
+                     
+                     <!-- Submission Box (Login Required) -->
+                     <div id="recommendFormContainer" class="recommend-form-container" style="background: var(--bg-card); padding: 14px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); margin-bottom: 16px;">
+                         <!-- Guest Placeholder (shown if not logged in) -->
+                         <div id="recommendGuestPlaceholder" style="text-align: center; padding: 12px 0;">
+                             <p style="font-size: 12px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted);">🔑 おすすめ動画を投稿するにはGoogleログインが必要です</p>
+                             <button class="btn-base btn-primary login-trigger-btn" style="padding: 8px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto; border-radius: var(--radius-md);">Googleでログイン 🚪</button>
+                         </div>
+                         
+                         <!-- Submission Form (shown if logged in) -->
+                         <form id="addRecommendForm" style="display: none; text-align: left;">
+                             <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: var(--primary-color);">おすすめレシピを投稿 🚀</h4>
+                             <div class="form-group" style="margin-bottom: 10px;">
+                                 <label for="recommendUrl" style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 4px;">YouTube Shorts の URL *</label>
+                                 <input type="text" id="recommendUrl" placeholder="例: https://youtube.com/shorts/XXXXXX" required style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 12px; background: var(--bg-main); color: var(--text-main);">
+                             </div>
+                             <div class="form-group" style="margin-bottom: 10px;">
+                                 <label for="recommendTitle" style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 4px;">料理名 (タイトル) *</label>
+                                 <input type="text" id="recommendTitle" placeholder="例: 包まない餃子" required style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 12px; background: var(--bg-main); color: var(--text-main);">
+                             </div>
+                             <div class="form-group" style="margin-bottom: 10px;">
+                                 <label for="recommendChannel" style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 4px;">YouTubeチャンネル名 *</label>
+                                 <input type="text" id="recommendChannel" placeholder="例: 料理研究家コウケンテツ" required style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 12px; background: var(--bg-main); color: var(--text-main);">
+                             </div>
+                             
+                             <div class="form-group" style="margin-bottom: 12px;">
+                                 <label style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 6px;">分類タグ (複数選択可)</label>
+                                 <div class="recommend-tags-container" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 100px; overflow-y: auto; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-main);">
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="和風"> 和風</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="洋風"> 洋風</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="中華"> 中華</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="その他海外料理"> 海外料理</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="野菜"> 野菜</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="豚"> 豚</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="牛"> 牛</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="鶏"> 鶏</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="挽肉"> 挽肉</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="魚介"> 魚介</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="卵"> 卵</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="サラダ"> サラダ</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="スープ鍋"> スープ鍋</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="ご飯物"> ご飯物</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="麺"> 麺</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="ガッツリ"> ガッツリ</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="あっさり"> あっさり</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="温"> 温</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="冷"> 冷</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="節約"> 節約</label>
+                                     <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; color: var(--text-main);"><input type="checkbox" name="recommendTags" value="時短"> 時短</label>
+                                 </div>
+                             </div>
+                             <div class="form-group" style="margin-bottom: 12px;">
+                                 <label for="recommendDescription" style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 4px;">動画の説明文・材料 (コピペ用)</label>
+                                 <textarea id="recommendDescription" rows="3" placeholder="概要欄の説明文や材料などを貼り付けてください（検索にヒットします）" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 12px; resize: vertical; background: var(--bg-main); color: var(--text-main);"></textarea>
+                             </div>
+                             <button type="submit" class="btn-base btn-primary" style="width: 100%; padding: 10px; font-size: 13px; font-weight: 700; border-radius: var(--radius-md);">おすすめを共有する 🚀</button>
+                         </form>
+                     </div>
+                 </div>
+                 
+                 <!-- Grid Album Output Area for Recommendations -->
+                 <div class="posts-grid-view" id="recommendGrid">
+                     <!-- Dynamically populated 3-column album grid -->
+                 </div>
+             </section>
 
             <!-- Likes Section -->
             <section id="tab-likes" class="tab-panel">
-                <div class="likes-header">
-                    <h2>お気に入りのごはん</h2>
-                    <p class="likes-subtitle">「美味しそう！」した投稿がここに集まります</p>
+                <div class="timeline-header-panel">
+                    <div class="timeline-title-row">
+                        <h2 style="margin: 0;">お気に入りレシピ動画 💛</h2>
+                    </div>
                 </div>
-                <div class="feed-grid" id="likesGrid">
-                    <!-- Liked posts will be generated dynamically by JS -->
+                <!-- Guest Placeholder -->
+                <div id="likesGuestPlaceholder" style="text-align: center; padding: 40px 20px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); margin-top: 16px;">
+                    <p style="font-size: 13px; font-weight: 700; margin-bottom: 14px; color: var(--text-muted);">🔑 お気に入り機能を使用するにはログインが必要です</p>
+                    <button class="btn-base btn-primary login-trigger-btn" style="padding: 10px 20px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto; border-radius: var(--radius-md);">Googleでログイン 🚪</button>
                 </div>
-                <div class="likes-empty-state" id="likesEmptyState" style="display: none;">
-                    <span class="empty-state-emoji">🍳</span>
-                    <p>お気に入りの投稿はまだありません。</p>
-                    <p class="empty-state-sub">タイムラインで「美味しそう！」ボタンを押してみましょう！</p>
+                <!-- Likes Grid Container (only visible if logged in) -->
+                <div class="posts-grid-view" id="likesGrid" style="display: none;">
+                    <!-- Loaded dynamically -->
                 </div>
             </section>
-
 
             <!-- Gacha Section -->
             <section id="tab-gacha" class="tab-panel">
                 <div class="gacha-container">
-                    <h2>今日何食べる？ガチャ</h2>
-                    <p class="gacha-subtitle">メニュー選びに迷ったら、ボタンを押して運に任せよう！</p>
+                    <h2 style="font-weight: 850; margin-bottom: 4px;">献立ガチャ 🎰</h2>
+                    <p class="gacha-subtitle">今日の献立が決まらない？レバーを回してみよう！</p>
                     
-                    <!-- Gacha Filters -->
-                    <div class="gacha-filters">
-                        <div class="gacha-filter-group">
-                            <span class="gacha-filter-label">ジャンル:</span>
-                            <div class="gacha-filter-options" id="gachaFilterStyle">
-                                <button class="gacha-filter-btn active" data-val="all">すべて</button>
-                                <button class="gacha-filter-btn" data-val="japanese">和風 🇯🇵</button>
-                                <button class="gacha-filter-btn" data-val="western">洋風 🍔</button>
-                                <button class="gacha-filter-btn" data-val="other">その他 🍛</button>
-                            </div>
-                        </div>
-                        <div class="gacha-filter-group">
-                            <span class="gacha-filter-label">味の傾向:</span>
-                            <div class="gacha-filter-options" id="gachaFilterTaste">
-                                <button class="gacha-filter-btn active" data-val="all">すべて</button>
-                                <button class="gacha-filter-btn" data-val="light">あっさり 🥗</button>
-                                <button class="gacha-filter-btn" data-val="heavy">ガッツリ 🍖</button>
-                            </div>
-                        </div>
-                        <div class="gacha-filter-group">
-                            <span class="gacha-filter-label">食材:</span>
-                            <div class="gacha-filter-options" id="gachaFilterIngredient">
-                                <button class="gacha-filter-btn active" data-val="all">すべて</button>
-                                <button class="gacha-filter-btn" data-val="pork">豚 🐷</button>
-                                <button class="gacha-filter-btn" data-val="chicken">鶏 🐔</button>
-                                <button class="gacha-filter-btn" data-val="beef">牛 🐮</button>
-                                <button class="gacha-filter-btn" data-val="seafood">魚介 🐟</button>
-                                <button class="gacha-filter-btn" data-val="other">その他 🥕</button>
-                            </div>
-                        </div>
-                        <div class="gacha-filter-group">
-                            <span class="gacha-filter-label">こだわり:</span>
-                            <div class="gacha-filter-options" id="gachaFilterFocus">
-                                <button class="gacha-filter-btn active" data-val="all">すべて</button>
-                                <button class="gacha-filter-btn" data-val="quick">時短 ⏱️</button>
-                                <button class="gacha-filter-btn" data-val="budget">節約 🪙</button>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="gacha-machine-wrapper">
-                        <div class="gacha-machine" id="gachaMachine">
+                        <div class="gacha-machine">
                             <div class="gacha-screen">
                                 <div class="gacha-screen-content" id="gachaScreenContent">
-                                    <span class="gacha-placeholder">❓</span>
+                                    <div class="gacha-placeholder">❓</div>
                                 </div>
                             </div>
                             <div class="gacha-handle-area">
-                                <div class="gacha-lever" id="gachaLever">
-                                    <div class="lever-knob"></div>
-                                    <div class="lever-bar"></div>
-                                </div>
+                                <div class="gacha-lever" id="gachaLever"></div>
                             </div>
                         </div>
-                        <button class="gacha-btn" id="gachaBtn">ガチャを回す！</button>
                     </div>
 
-                    <!-- Gacha Result Modal Overlay (within page) -->
-                    <div class="gacha-result-card" id="gachaResultCard" style="display: none;">
+                    <!-- Gacha Result Card -->
+                    <div class="gacha-result-card" id="gachaResultCard" style="display: none; text-align: center;">
                         <span class="result-badge">本日のラッキーレシピ ✨</span>
-                        <h3 id="gachaResultTitle">とろとろオムライス</h3>
+                        <h3 class="post-video-title" id="gachaResultTitle" style="color: var(--primary-color); font-weight: 800; font-size: 20px; margin: 10px 0 5px 0;">豚の生姜焼き</h3>
+                        <p class="gacha-result-desc" id="gachaResultDesc" style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">紹介：リュウジのバズレシピ</p>
                         
-                        <!-- Embedded YouTube Video -->
-                        <div class="gacha-youtube-container">
-                            <iframe id="gachaYoutubeIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <!-- Embedded YouTube Video (9:16 Vertical Shorts Style) -->
+                        <div class="gacha-youtube-container" id="gachaYoutubeContainer" style="position: relative; width: 100%; max-width: 260px; aspect-ratio: 9 / 16; margin: 14px auto; overflow: hidden; border-radius: var(--radius-md); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background-color: #000;">
+                            <!-- Dynamically generated iframe -->
                         </div>
-
-                        <p class="gacha-result-desc" id="gachaResultDesc">レシピ動画を観ながら作ってみましょう！</p>
                         
-                        <div class="gacha-result-actions">
-                            <button class="gacha-action-btn primary" id="gachaAddCalendarBtn">このレシピで作る！ 🍳</button>
-                            <button class="gacha-action-btn secondary" id="gachaRetryBtn">もう一度回す</button>
-                        </div>
+                        <button class="gacha-action-btn secondary" id="gachaRetryBtn" style="width: 100%; max-width: 260px; margin: 14px auto 8px auto; display: block; border-color: var(--primary-color); color: var(--primary-color);">もう一度回す 🔄</button>
+                        <button class="btn-base btn-primary" id="gachaLikeBtn" style="width: 100%; max-width: 260px; margin: 0 auto 0 auto; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--radius-md); font-weight: 800; font-size: 13px;">お気に入りに追加する 💛</button>
                     </div>
 
-                    <!-- Gacha Recipe Manager Accordion -->
-                    <div class="gacha-manager-accordion" id="gachaManagerAccordion" style="display: none;">
-                        <button class="accordion-header" id="accordionHeader">
-                            <span>レシピの追加・管理 ⚙️</span>
-                            <span class="accordion-icon">▼</span>
-                        </button>
-                        <div class="accordion-content" id="accordionContent">
-                            <form id="addRecipeForm" class="add-recipe-form">
-                                <div class="form-group">
-                                    <label for="recipeUrl" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">YouTube動画のURL または ID *</label>
-                                    <input type="text" id="recipeUrl" placeholder="https://www.youtube.com/watch?v=... または ID" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box;">
-                                </div>
-                                <div class="form-group" style="margin-top: 10px;">
-                                    <label for="recipeTitle" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">料理名 *</label>
-                                    <input type="text" id="recipeTitle" placeholder="料理名を入力 (例: 至高の生姜焼き)" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box;">
-                                </div>
-                                <div class="form-group" style="margin-top: 10px;">
-                                    <label for="recipeCreator" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">紹介者・チャンネル名 *</label>
-                                    <input type="text" id="recipeCreator" placeholder="チャンネル名などを入力 (例: 料理研究家リュウジ)" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box;">
-                                </div>
-                                <div class="form-row" style="display: flex; gap: 10px; margin-top: 10px;">
-                                    <div class="form-group" style="flex: 1;">
-                                        <label for="recipeStyle" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">ジャンル *</label>
-                                        <select id="recipeStyle" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
-                                            <option value="all">すべて / 指定なし 🌐</option>
-                                            <option value="japanese">和風 🇯🇵</option>
-                                            <option value="western">洋風 🍔</option>
-                                            <option value="other">その他 🍛</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group" style="flex: 1;">
-                                        <label for="recipeTaste" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">味の傾向 *</label>
-                                        <select id="recipeTaste" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
-                                            <option value="all">すべて / 指定なし 🌐</option>
-                                            <option value="light">あっさり 🥗</option>
-                                            <option value="heavy">ガッツリ 🍖</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-row" style="display: flex; gap: 10px; margin-top: 10px;">
-                                    <div class="form-group" style="flex: 1;">
-                                        <label style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; display: block;">食材 (複数選択可) *</label>
-                                        <div class="checkbox-group" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background-color: #FFF; padding: 8px 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-sizing: border-box;">
-                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                                                <input type="checkbox" name="recipeIngredients" value="pork" style="cursor: pointer;"> 豚 🐷
-                                            </label>
-                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                                                <input type="checkbox" name="recipeIngredients" value="chicken" style="cursor: pointer;"> 鶏 🐔
-                                            </label>
-                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                                                <input type="checkbox" name="recipeIngredients" value="beef" style="cursor: pointer;"> 牛 🐮
-                                            </label>
-                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                                                <input type="checkbox" name="recipeIngredients" value="seafood" style="cursor: pointer;"> 魚介 🐟
-                                            </label>
-                                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer; grid-column: span 2;">
-                                                <input type="checkbox" name="recipeIngredients" value="other" style="cursor: pointer;"> その他 🥕
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="form-group" style="flex: 1;">
-                                        <label for="recipeFocus" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">こだわり *</label>
-                                        <select id="recipeFocus" required class="login-input" style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
-                                            <option value="all">すべて / 指定なし 🌐</option>
-                                            <option value="quick">時短 ⏱️</option>
-                                            <option value="budget">節約 🪙</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button type="submit" class="gacha-btn" style="margin-top: 16px; width: 100%; padding: 12px; box-shadow: 0 4px 10px rgba(255,192,69,0.25);">ガチャに新レシピを登録する ✨</button>
-                            </form>
-
-                            <!-- Custom Recipe List Manager -->
-                            <div class="custom-recipes-list-section" style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
-                                <h4 style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px;">登録済みのカスタムレシピ 📋</h4>
-                                <div id="customRecipesList" class="custom-recipes-list">
-                                    <!-- Dynamic list of custom recipes will be injected here -->
-                                </div>
+                    <!-- Recipe list manager accordion -->
+                    <div class="gacha-manager-accordion" id="gachaManagerAccordion">
+                        <div class="accordion-header" id="accordionHeader">
+                            <span>登録済みレシピ動画一覧 (<span id="registeredCount">0</span>)</span>
+                            <span class="accordion-icon">▶</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="custom-recipes-list" id="customRecipesList">
+                                <!-- Dynamically loaded registered list -->
                             </div>
                         </div>
                     </div>
@@ -395,318 +273,151 @@
             </section>
         </main>
 
-        <!-- Floating Action Button to Add Meal -->
-        <button class="fab-btn" id="openModalBtn" title="食事を追加する">
-            <span class="fab-icon">+</span>
-        </button>
+        <!-- Mobile Bottom Navigation Bar (Hidden on desktop) -->
+        <nav class="bottom-nav-bar">
+            <button class="bottom-nav-item active" data-tab="timeline">
+                <span class="bottom-nav-icon">🕒</span>
+                <span class="bottom-nav-label">フィード</span>
+            </button>
+            <button class="bottom-nav-item" data-tab="gacha">
+                <span class="bottom-nav-icon">🎰</span>
+                <span class="bottom-nav-label">ガチャ</span>
+            </button>
+            <button class="bottom-nav-item upload-trigger-btn" id="bottomNavUploadBtn" style="display: none;">
+                <span class="bottom-nav-icon-plus">➕</span>
+            </button>
+            <button class="bottom-nav-item" data-tab="recommend">
+                <span class="bottom-nav-icon">📢</span>
+                <span class="bottom-nav-label">おすすめ</span>
+            </button>
+            <button class="bottom-nav-item" data-tab="likes">
+                <span class="bottom-nav-icon">💛</span>
+                <span class="bottom-nav-label">お気に入り</span>
+            </button>
+        </nav>
+    </div>
 
-        <!-- Add Meal Modal -->
-        <div class="modal-overlay" id="addMealModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>きょう何食べた？</h2>
-                    <button class="close-btn" id="closeModalBtn">&times;</button>
-                </div>
-                <form id="mealForm" class="meal-form">
-                    <!-- Photo Upload -->
-                    <div class="form-group image-upload-group">
-                        <label>ごはんの写真</label>
-                        <div class="dropzone" id="dropzone">
-                            <input type="file" id="imageFile" accept="image/*" class="file-input">
-                            <div class="dropzone-text" id="dropzoneText">
-                                <span class="dropzone-icon">📸</span>
-                                <p>クリックして写真をアップロード</p>
-                                <span class="dropzone-sub">またはここにドラッグ＆ドロップ</span>
-                            </div>
-                            <img id="imagePreview" class="image-preview" src="" alt="プレビュー" style="display: none;">
-                        </div>
-                    </div>
+    <!-- ==========================================================================
+       Modals & Overlays
+       ========================================================================== -->
 
-                    <!-- Dish Name -->
+    <!-- Add Recipe Video Modal Form -->
+    <div class="modal-overlay" id="addMealModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeAddMealBtn">&times;</button>
+            <h3 class="form-title">おすすめレシピ動画を登録 🎬</h3>
+            <form id="addMealForm">
+                <div class="form-body">
                     <div class="form-group">
-                        <label for="dishName">料理名 <span class="required">*</span></label>
-                        <input type="text" id="dishName" required placeholder="例：特製デミグラスオムライス、イチゴのショートケーキ">
+                        <label for="recipeUrl">YouTube動画のURL または 動画ID *</label>
+                        <input type="text" id="recipeUrl" placeholder="例: https://www.youtube.com/watch?v=XXXXXX または Shorts動画のリンク" required style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 12px; background: var(--bg-main); color: var(--text-main);">
                     </div>
-
-                    <!-- Row: Meal Type & Category -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="mealType">食べるタイミング <span class="required">*</span></label>
-                            <select id="mealType" required>
-                                <option value="morning">🌅 朝食</option>
-                                <option value="lunch" selected>☀️ 昼食</option>
-                                <option value="dinner">🌙 夕食</option>
-                                <option value="snack">☕ おやつ</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="mealCategory">カテゴリ <span class="required">*</span></label>
-                            <select id="mealCategory" required>
-                                <option value="self-cooked" selected>🍳 自炊</option>
-                                <option value="eating-out">🍔 外食</option>
-                                <option value="takeout">🍱 出来合い</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Tags: Genre & Taste & Ingredients & Focus (To match Gacha) -->
-                    <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 12px;">
-                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                            <label for="mealGenre" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">ジャンル *</label>
-                            <select id="mealGenre" required style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
-                                <option value="all" selected>指定なし / その他 🍲</option>
-                                <option value="japanese">和風 🇯🇵</option>
-                                <option value="western">洋風 🍔</option>
-                                <option value="other">中華・エスニック等 🍛</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                            <label for="mealTaste" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">味の傾向 *</label>
-                            <select id="mealTaste" required style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
-                                <option value="all" selected>指定なし 🌐</option>
-                                <option value="light">あっさり 🥗</option>
-                                <option value="heavy">ガッツリ 🍖</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 12px;">
-                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                            <label style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">食材 (複数選択可)</label>
-                            <div class="checkbox-group" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; background-color: #FFF; padding: 6px 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-sizing: border-box; font-size: 10px; line-height: 1.2;">
-                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0;">
-                                    <input type="checkbox" name="mealIngredients" value="pork" style="cursor: pointer;"> 豚 🐷
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0;">
-                                    <input type="checkbox" name="mealIngredients" value="chicken" style="cursor: pointer;"> 鶏 🐔
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0;">
-                                    <input type="checkbox" name="mealIngredients" value="beef" style="cursor: pointer;"> 牛 🐮
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0;">
-                                    <input type="checkbox" name="mealIngredients" value="seafood" style="cursor: pointer;"> 魚介 🐟
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 4px; font-weight: 700; cursor: pointer; margin: 0; grid-column: span 2;">
-                                    <input type="checkbox" name="mealIngredients" value="other" style="cursor: pointer;"> その他 🥕
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                            <label for="mealFocus" style="font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 4px; display: block;">こだわり *</label>
-                            <select id="mealFocus" required style="padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFF;">
-                                <option value="all" selected>指定なし 🌐</option>
-                                <option value="quick">時短 ⏱️</option>
-                                <option value="budget">節約 🪙</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Comment -->
                     <div class="form-group">
-                        <label for="comment">ひ言メモ</label>
-                        <textarea id="comment" rows="3" placeholder="味の感想や、お店の名前などを自由にメモしましょう"></textarea>
+                        <label for="recipeTitle">料理名 (タイトル) *</label>
+                        <input type="text" id="recipeTitle" placeholder="例: 極上の肉じゃが" required style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 12px; background: var(--bg-main); color: var(--text-main);">
                     </div>
-
-                    <!-- Submit -->
-                    <button type="submit" class="submit-btn">記録する！ 🎉</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Detail Dialog Modal -->
-        <div class="modal-overlay" id="detailModal">
-            <div class="modal-content detail-content">
-                <button class="close-btn" id="closeDetailModalBtn">&times;</button>
-                <div class="detail-img-container">
-                    <img id="detailImg" src="" alt="料理画像">
-                </div>
-                <div class="detail-body">
-                    <div class="detail-meta">
-                        <span class="detail-badge" id="detailMealType">朝食</span>
-                        <span class="detail-badge secondary" id="detailCategory">自炊</span>
-                        <span class="detail-time" id="detailTime">2026-07-02</span>
+                    <div class="form-group">
+                        <label for="recipeChannel">YouTubeチャンネル名 (紹介者など) *</label>
+                        <input type="text" id="recipeChannel" placeholder="例: 料理研究家リュウジのバズレシピ" required style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 12px; background: var(--bg-main); color: var(--text-main);">
                     </div>
-                    <h2 id="detailTitle">料理名</h2>
-                    <div class="detail-tags-container" id="detailTagsContainer" style="display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px 0;"></div>
-                    <p class="detail-comment" id="detailComment">コメント</p>
-
-                    <!-- Author Profile Card -->
-                    <div class="detail-author-card" id="detailAuthorCard">
-                        <img id="detailAuthorAvatar" src="" class="detail-author-avatar" alt="プロフ">
-                        <div class="detail-author-info">
-                            <span id="detailAuthorName" class="detail-author-name">投稿者</span>
-                            <p id="detailAuthorBio" class="detail-author-bio">自己紹介はありません。</p>
+                    
+                    <div class="form-group">
+                        <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 6px;">分類タグ (複数選択可)</label>
+                        <div class="tags-checkbox-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; max-height: 180px; overflow-y: auto; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-main); text-align: left;">
+                            <!-- Genre -->
+                            <div style="font-weight: bold; grid-column: 1 / -1; margin-top: 4px; border-bottom: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted);">料理ジャンル</div>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="和風"> 和風</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="洋風"> 洋風</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="中華"> 中華</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="その他海外料理"> 海外料理</label>
+                            
+                            <!-- Ingredients -->
+                            <div style="font-weight: bold; grid-column: 1 / -1; margin-top: 8px; border-bottom: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted);">メイン食材</div>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="野菜"> 野菜</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="豚"> 豚</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="牛"> 牛</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="鶏"> 鶏</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="挽肉"> 挽肉</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="魚介"> 魚介</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="卵"> 卵</label>
+                            
+                            <!-- Dish Type -->
+                            <div style="font-weight: bold; grid-column: 1 / -1; margin-top: 8px; border-bottom: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted);">料理のタイプ</div>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="サラダ"> サラダ</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="スープ鍋"> スープ鍋</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="ご飯物"> ご飯物</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="麺"> 麺</label>
+                            
+                            <!-- Characteristics -->
+                            <div style="font-weight: bold; grid-column: 1 / -1; margin-top: 8px; border-bottom: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted);">特徴</div>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="ガッツリ"> ガッツリ</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="あっさり"> あっさり</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="温"> 温</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="冷"> 冷</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="節約"> 節約</label>
+                            <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main);"><input type="checkbox" name="recipeTags" value="時短"> 時短</label>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Login Welcome Panel Overlay -->
-        <div class="login-overlay" id="loginOverlay" style="display: none;">
-            <div class="login-card">
-                <button class="close-btn" id="closeLoginBtn">&times;</button>
-                <span class="login-logo-emoji">🍳</span>
-                <h2>きょう何食べた？</h2>
-                <p class="login-tagline">毎日のごはんをみんなで記録・共有しよう！</p>
-                <button class="login-google-btn" id="loginGoogleBtn">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="google-logo">
-                    <span>Googleアカウントでログイン</span>
-                </button>
-
-                <div class="login-divider">
-                    <span>または</span>
-                </div>
-
-                <!-- Email Login Form Toggle -->
-                <button type="button" class="login-toggle-email-btn" id="toggleEmailFormBtn">メールアドレスでログイン / 登録</button>
-
-                <!-- Hidden Email Form -->
-                <form id="emailLoginForm" class="email-login-form" style="display: none;">
-                    <div class="form-group" style="width:100%; margin-bottom:0;">
-                        <input type="email" id="loginEmail" placeholder="メールアドレス" required class="login-input">
-                    </div>
-                    <div class="form-group" style="width:100%; margin-bottom:0;">
-                        <input type="password" id="loginPassword" placeholder="パスワード (6文字以上)" required minlength="6" class="login-input">
-                    </div>
-                    <div class="email-action-buttons">
-                        <button type="submit" class="email-btn primary" id="emailLoginBtn">ログイン</button>
-                        <button type="button" class="email-btn secondary" id="emailRegisterBtn">新規登録</button>
-                    </div>
-                </form>
-
-                <p class="login-footer-text">ログインすると、自分の食事の記録、他の人とのリアルタイム共有、投稿の削除ができます。</p>
-            </div>
-        </div>
-
-        <!-- Profile Setup Modal -->
-        <div class="modal-overlay" id="profileModal">
-            <div class="modal-content profile-setup-content">
-                <div class="modal-header">
-                    <h2>プロフィール設定</h2>
-                </div>
-                <form id="profileForm" class="profile-form">
-                    <!-- Profile Photo Crop/Upload -->
-                    <div class="form-group profile-upload-group">
-                        <label>プロフィール写真</label>
-                        <div class="profile-dropzone" id="profileDropzone">
-                            <input type="file" id="profileImageFile" accept="image/*" class="file-input">
-                            <div class="profile-dropzone-text" id="profileDropzoneText">
-                                <span class="profile-dropzone-icon">👤</span>
-                                <p>写真を選択</p>
-                            </div>
-                            <img id="profileImagePreview" class="profile-image-preview" src="" alt="プレビュー" style="display: none;">
-                        </div>
-                    </div>
-
-                    <!-- Nickname -->
+                    
                     <div class="form-group">
-                        <label for="profileNickname">ニックネーム <span class="required">*</span></label>
-                        <input type="text" id="profileNickname" required placeholder="例：たべっ子、rei" maxlength="15">
+                        <label for="recipeDescription" style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">動画の説明文・材料 (コピペ用)</label>
+                        <textarea id="recipeDescription" rows="4" placeholder="YouTube概要欄からコピペするか、簡単なメモを入力してください（検索対象になります）" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 13px; resize: vertical; background: var(--bg-main); color: var(--text-main);"></textarea>
                     </div>
-
-                    <!-- Bio -->
-                    <div class="form-group">
-                        <label for="profileBio">自己紹介</label>
-                        <textarea id="profileBio" rows="3" placeholder="趣味や好きな食べ物などを自由に書いてみましょう" maxlength="150"></textarea>
-                    </div>
-
-                    <!-- Submit Profile -->
-                    <button type="submit" class="submit-btn" id="saveProfileBtn">設定を保存する ✨</button>
-                </form>
-            </div>
+                </div>
+                <div class="form-footer-actions">
+                    <button type="button" class="btn-base btn-secondary" id="cancelAddMealBtn">キャンセル</button>
+                    <button type="submit" class="btn-base btn-primary" id="saveMealBtn">登録する</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- User Home Modal -->
-    <div class="modal-overlay" id="userHomeModal">
-        <div class="modal-content user-home-content">
-            <button class="close-btn" id="closeUserHomeModalBtn">&times;</button>
-            
-            <!-- Profile Header Info -->
-            <div class="user-home-profile">
-                <img id="userHomeAvatar" src="" class="user-home-avatar-img" alt="アバター">
-                <h2 id="userHomeName">ユーザー名</h2>
-                <p id="userHomeBio" class="user-home-bio">自己紹介はありません。</p>
+    <!-- YouTube Embedded Player + Details Modal -->
+    <div class="modal-overlay" id="youtubePlayerModal">
+        <div class="modal-content" style="max-width: 550px;">
+            <button class="close-btn" id="closeYoutubePlayerBtn">&times;</button>
+            <div class="youtube-player-wrapper" id="youtubeIframeContainer">
+                <!-- Dynamic Iframe Embedded Player -->
+            </div>
+            <div class="detail-modal-body">
+                <h3 class="post-video-title" id="detailVideoTitle">極上の肉じゃが</h3>
+                <p class="post-channel-name" id="detailChannelName">料理研究家リュウジのバズレシピ</p>
                 
-                <!-- Follow Statistics -->
-                <div class="user-home-stats">
-                    <div class="stat-item">
-                        <span id="userHomeFollowersCount" class="stat-number">0</span>
-                        <span class="stat-label">フォロワー</span>
-                    </div>
-                    <div class="stat-item">
-                        <span id="userHomeFollowingCount" class="stat-number">0</span>
-                        <span class="stat-label">フォロー中</span>
-                    </div>
+                <div class="post-tags-container" id="detailTagsContainer">
+                    <!-- Badges -->
                 </div>
-                
-                <!-- Follow Button -->
-                <button id="userHomeFollowBtn" class="follow-btn">フォローする</button>
-            </div>
-            
-            <!-- Posts Section Divider -->
-            <div class="user-home-divider" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 12px; width: 100%;">
-                <span style="font-weight: 800; color: var(--text-main); font-size: 13px;">投稿一覧</span>
-                <div class="view-toggle-buttons" style="display: flex; gap: 4px;">
-                    <button class="view-toggle-btn active" id="userHomeListViewBtn" title="フィード表示" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm);">☰</button>
-                    <button class="view-toggle-btn" id="userHomeGridViewBtn" title="グリッド表示" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm);">田</button>
+
+                <div class="post-interactive-row" style="margin-top: 14px; margin-bottom: 14px; display: flex; justify-content: flex-start; align-items: center;">
+                    <button class="like-action-btn" id="detailLikeBtn" style="flex: none; width: auto; padding: 8px 16px;">
+                        <span class="like-icon">🤤</span> 美味しそう！ (<span id="detailLikeCount">0</span>)
+                    </button>
                 </div>
-            </div>
-            
-            <!-- Scrollable User Posts Grid -->
-            <div class="user-home-grid-container">
-                <div class="feed-grid" id="userHomeGrid">
-                    <!-- Dynamically filled with user's posts -->
+
+                <div class="post-comment" style="border-top: 1px solid var(--border-color); padding-top: 12px; text-align: left;">
+                    <span class="caption-user" id="detailUserName">ゲスト</span>
+                    <div id="detailUserReview" style="font-size: 12px; color: var(--text-main); white-space: pre-wrap; margin-top: 6px; line-height: 1.5; font-style: italic; background: var(--bg-main); padding: 10px; border-radius: var(--radius-md); border-left: 3px solid var(--primary-color);">説明文がここに入ります。</div>
                 </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Bottom Navigation Bar for Mobile -->
-    <nav class="bottom-nav-bar">
-        <button class="bottom-nav-item active" data-tab="timeline">
-            <span class="bottom-nav-icon">🕒</span>
-            <span class="bottom-nav-label">フィード</span>
-        </button>
-        <button class="bottom-nav-item" data-tab="calendar">
-            <span class="bottom-nav-icon">📅</span>
-            <span class="bottom-nav-label">カレンダー</span>
-        </button>
-        <button class="bottom-nav-item upload-trigger-btn" id="bottomNavUploadBtn">
-            <span class="bottom-nav-icon-plus">➕</span>
-        </button>
-        <button class="bottom-nav-item" data-tab="likes">
-            <span class="bottom-nav-icon">💛</span>
-            <span class="bottom-nav-label">お気に入り</span>
-        </button>
-        <button class="bottom-nav-item" data-tab="gacha">
-            <span class="bottom-nav-icon">🎰</span>
-            <span class="bottom-nav-label">ガチャ</span>
-        </button>
-    </nav>
-
-    <!-- User List Modal (Followers / Following) -->
-    <div class="modal-overlay" id="userListModal" style="z-index: 11000;">
-        <div class="modal-content user-list-content">
-            <button class="close-btn" id="closeUserListModalBtn">&times;</button>
-            <h3 id="userListTitle" class="user-list-title">フォロワー</h3>
-            <div class="user-list-container" id="userListContainer">
-                <!-- Dynamically filled with user cards -->
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase Auth / Login Overlay -->
+    <div class="modal-overlay" id="loginOverlay">
+        <div class="modal-content" style="max-width: 360px; padding: 24px; text-align: center; gap: 12px;">
+            <span style="font-size: 48px;">🔒</span>
+            <h2 style="font-weight: 850;">ログイン</h2>
+            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">お気に入り登録や、みんなへのおすすめ動画を投稿するにはアカウントへのログインが必要です。</p>
+            <button class="btn-base btn-primary" id="googleLoginBtn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: var(--radius-md);">Googleでサインイン 🚀</button>
+            <button class="btn-base btn-secondary" id="guestLoginBtn" style="width: 100%; padding: 12px; border-radius: var(--radius-md);">ログインせずに使う（閲覧のみ）</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat Mode) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-    <!-- Application Logic -->
-    <script src="app.js?v=3.00"></script>
-
-    <!-- Cloudflare Web Analytics -->
-    <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c7d041f0daef40a7a218e30539e66cb9"}'></script>
-    <!-- End Cloudflare Web Analytics -->
+    <!-- Application Script -->
+    <script src="app.js?v=3.90"></script>
 </body>
 </html>
