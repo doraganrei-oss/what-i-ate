@@ -251,8 +251,8 @@ function setupGuestSession() {
 // Load data either from Firestore or LocalStorage
 function loadData() {
     if (db) {
-        // Run migration from legacy 'shared_gacha_recipes' document if present (only if not guest mode)
-        if (!isGuestMode && currentUser && currentUser.uid !== guestProfile.uid) {
+        // Run migration from legacy 'shared_gacha_recipes' document if present (only if admin)
+        if (isAdmin()) {
             db.collection('meals').doc('shared_gacha_recipes').get()
                 .then(doc => {
                     if (doc.exists) {
