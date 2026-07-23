@@ -53,6 +53,7 @@ let likesViewMode = 'grid';
 let cachedRecipes = [];
 let cachedRecommendations = [];
 let drawnSessionIds = new Set(); // Excludes already drawn recipe IDs in Gacha session
+let editingRecipeId = null; // Tracks the ID of the recipe being edited
 
 // Default guest profile
 const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120&h=120";
@@ -409,6 +410,7 @@ function initEventListeners() {
     const bottomNavUploadBtn = document.getElementById('bottomNavUploadBtn');
     if (bottomNavUploadBtn) {
         bottomNavUploadBtn.addEventListener('click', () => {
+            resetAddMealFormState();
             document.getElementById('addMealModal').classList.add('active');
         });
     }
@@ -416,6 +418,11 @@ function initEventListeners() {
     // Modal close buttons
     document.querySelectorAll('.modal-overlay .close-btn, .btn-secondary').forEach(btn => {
         btn.addEventListener('click', (e) => {
+            // Reset Add Meal Form state if it was open
+            const addMealModal = document.getElementById('addMealModal');
+            if (addMealModal && addMealModal.classList.contains('active')) {
+                resetAddMealFormState();
+            }
             // Close all overlays
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 if (modal.id !== 'loginOverlay') {
@@ -506,7 +513,7 @@ function handleAddRecipeSubmit(e) {
 
     // Verify Admin rights
     if (!isAdmin()) {
-        alert("レシピの新規登録は管理者のみ許可されています。");
+        alert("レシピの新規登録・編集は管理者のみ許可されています。");
         return;
     }
 
@@ -524,44 +531,138 @@ function handleAddRecipeSubmit(e) {
         return;
     }
 
-    const newRecipe = {
-        youtubeUrl: recipeUrl,
-        videoId: videoId,
-        dishName: recipeTitle,
-        channelName: recipeChannel,
-        tags: recipeTags,
-        description: recipeDescription,
-        likesCount: 0,
-        likedUsers: [],
-        createdBy: currentUser.uid,
-        createdByName: currentUser.displayName,
-        avatarUrl: currentUser.photoURL || DEFAULT_AVATAR,
-        createdAt: new Date().toISOString()
-    };
-
-    if (isGuestMode || !db) {
-        // Save to LocalStorage
-        newRecipe.id = 'recipe_' + Date.now();
-        cachedRecipes.unshift(newRecipe);
-        setLocalData('what_i_ate_recipes', cachedRecipes);
-        completeSubmission();
-    } else {
-        // Save to Firestore
-        db.collection('meals').add(newRecipe)
+    if (editingRecipeId) {
+        // UPDATE MODE
+        if (isGuestMode || !db) {
+            const index = cachedRecipes.findIndex(r => r.id === editingRecipeId);
+            if (index !== -1) {
+                cachedRecipes[index].youtubeUrl = recipeUrl;
+                cachedRecipes[index].videoId = videoId;
+                cachedRecipes[index].dishName = recipeTitle;
+                cachedRecipes[index].channelName = recipeChannel;
+                cachedRecipes[index].tags = recipeTags;
+                cachedRecipes[index].description = recipeDescription;
+                setLocalData('what_i_ate_recipes', cachedRecipes);
+            }
+            completeSubmission();
+        } else {
+            // Update Firestore
+            db.collection('meals').doc(editingRecipeId).update({
+                youtubeUrl: recipeUrl,
+                videoId: videoId,
+                dishName: recipeTitle,
+                channelName: recipeChannel,
+                tags: recipeTags,
+                description: recipeDescription
+            })
             .then(() => {
                 completeSubmission();
             })
             .catch(error => {
-                console.error("Firestore save error:", error);
-                alert("登録に失敗しました。");
+                console.error("Firestore update error:", error);
+                alert("更新に失敗しました。");
             });
+        }
+    } else {
+        // CREATE MODE
+        const newRecipe = {
+            youtubeUrl: recipeUrl,
+            videoId: videoId,
+            dishName: recipeTitle,
+            channelName: recipeChannel,
+            tags: recipeTags,
+            description: recipeDescription,
+            likesCount: 0,
+            likedUsers: [],
+            createdBy: currentUser.uid,
+            createdByName: currentUser.displayName,
+            avatarUrl: currentUser.photoURL || DEFAULT_AVATAR,
+            createdAt: new Date().toISOString()
+        };
+
+        if (isGuestMode || !db) {
+            // Save to LocalStorage
+            newRecipe.id = 'recipe_' + Date.now();
+            cachedRecipes.unshift(newRecipe);
+            setLocalData('what_i_ate_recipes', cachedRecipes);
+            completeSubmission();
+        } else {
+            // Save to Firestore
+            db.collection('meals').add(newRecipe)
+                .then(() => {
+                    completeSubmission();
+                })
+                .catch(error => {
+                    console.error("Firestore save error:", error);
+                    alert("登録に失敗しました。");
+                });
+        }
     }
 
     function completeSubmission() {
-        document.getElementById('addMealForm').reset();
+        resetAddMealFormState();
         document.getElementById('addMealModal').classList.remove('active');
         renderFeed();
         updateRegisteredRecipesList();
+    }
+}
+
+function openEditRecipeModal(recipeId) {
+    if (!isAdmin()) {
+        alert("編集権限がありません。");
+        return;
+    }
+
+    const recipe = cachedRecipes.find(r => r.id === recipeId);
+    if (!recipe) {
+        alert("該当するレシピが見つかりませんでした。");
+        return;
+    }
+
+    editingRecipeId = recipeId;
+
+    // Pre-populate input fields
+    document.getElementById('recipeUrl').value = recipe.youtubeUrl || '';
+    document.getElementById('recipeTitle').value = recipe.dishName || '';
+    document.getElementById('recipeChannel').value = recipe.channelName || '';
+    document.getElementById('recipeDescription').value = recipe.description || '';
+
+    // Check matching tags
+    document.querySelectorAll('input[name="recipeTags"]').forEach(cb => {
+        cb.checked = recipe.tags && recipe.tags.includes(cb.value);
+    });
+
+    // Modify modal titles
+    const modalTitle = document.querySelector('#addMealModal .form-title');
+    if (modalTitle) {
+        modalTitle.innerText = "レシピ情報の編集 ✏️";
+    }
+    const saveBtn = document.getElementById('saveMealBtn');
+    if (saveBtn) {
+        saveBtn.innerText = "更新する";
+    }
+
+    // Open the modal
+    document.getElementById('addMealModal').classList.add('active');
+}
+
+function resetAddMealFormState() {
+    editingRecipeId = null;
+    const form = document.getElementById('addMealForm');
+    if (form) form.reset();
+    
+    // Clear check boxes
+    document.querySelectorAll('input[name="recipeTags"]').forEach(cb => {
+        cb.checked = false;
+    });
+
+    const modalTitle = document.querySelector('#addMealModal .form-title');
+    if (modalTitle) {
+        modalTitle.innerText = "レシピ新規登録 🍳";
+    }
+    const saveBtn = document.getElementById('saveMealBtn');
+    if (saveBtn) {
+        saveBtn.innerText = "登録する";
     }
 }
 
@@ -1173,6 +1274,7 @@ function updateRegisteredRecipesList() {
             </div>
             ${isAdmin() ? `
             <div class="custom-recipe-actions">
+                <button class="edit-recipe-btn" data-id="${recipe.id}">編集 ✏️</button>
                 <button class="delete-recipe-btn" data-id="${recipe.id}">削除 🗑️</button>
             </div>
             ` : ''}
@@ -1183,8 +1285,12 @@ function updateRegisteredRecipesList() {
             openVideoDetailModal(recipe.id);
         });
 
-        // Recipe deletion action listener
+        // Recipe actions (Edit / Delete)
         if (isAdmin()) {
+            item.querySelector('.edit-recipe-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                openEditRecipeModal(recipe.id);
+            });
             item.querySelector('.delete-recipe-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteRecipe(recipe.id);
