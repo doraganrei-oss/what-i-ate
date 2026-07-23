@@ -2620,7 +2620,7 @@ body {
     background-color: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
     border-top: 1px solid var(--border-color);
-    display: flex;
+    display: none;
     justify-content: space-around;
     align-items: center;
     z-index: 10000;
@@ -2823,6 +2823,10 @@ body {
     
     .bottom-nav-bar {
         display: flex !important;
+    }
+    
+    .fab-btn {
+        display: none !important;
     }
     
     .app-container {
