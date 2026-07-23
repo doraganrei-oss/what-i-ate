@@ -138,6 +138,12 @@ function initAuth() {
             document.getElementById('userHeaderName').innerText = user.displayName || "o";
             userProfileHeader.style.display = 'flex';
             
+            console.log("=== Auth Debug ===");
+            console.log("Logged in email:", user.email);
+            console.log("Admin list:", ADMIN_EMAILS);
+            console.log("isAdmin():", isAdmin());
+            console.log("==================");
+            
             updateAuthUiState();
             loadData();
         } else {
@@ -755,15 +761,16 @@ function renderFeed() {
         const gridItem = document.createElement('div');
         gridItem.className = 'grid-post-item';
         
-        // Show delete button on the card ONLY for admins in timeline
-        const showDelete = isAdmin() && !isLikesTab;
+        // Show edit/delete buttons on the card ONLY for admins in timeline
+        const showAdminControls = isAdmin() && !isLikesTab;
 
         gridItem.innerHTML = `
             <img src="${getYouTubeThumbnail(recipe.videoId)}" alt="${recipe.dishName}" class="grid-post-img" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/${recipe.videoId}/hqdefault.jpg';">
             <div class="grid-post-overlay">
                 <div class="grid-overlay-item">🤤 ${recipe.likesCount || 0}</div>
             </div>
-            ${showDelete ? `
+            ${showAdminControls ? `
+                <button class="grid-card-edit-btn" style="position: absolute; top: 8px; right: 40px; z-index: 10; background: rgba(0,0,0,0.6); color: #FFF; border: none; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; transition: background 0.2s;" title="編集">✏️</button>
                 <button class="grid-card-delete-btn" style="position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(0,0,0,0.6); color: #FFF; border: none; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; transition: background 0.2s;" title="削除">🗑️</button>
             ` : ''}
             
@@ -775,12 +782,21 @@ function renderFeed() {
 
         gridItem.addEventListener('click', () => openVideoDetailModal(recipe.id));
         
-        if (showDelete) {
+        if (showAdminControls) {
+            const editBtn = gridItem.querySelector('.grid-card-edit-btn');
+            if (editBtn) {
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent opening video details modal
+                    openEditRecipeModal(recipe.id);
+                });
+            }
             const delBtn = gridItem.querySelector('.grid-card-delete-btn');
-            delBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent opening video details modal
-                deleteRecipe(recipe.id);
-            });
+            if (delBtn) {
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent opening video details modal
+                    deleteRecipe(recipe.id);
+                });
+            }
         }
         
         gridContainer.appendChild(gridItem);
