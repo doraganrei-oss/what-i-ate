@@ -94,6 +94,9 @@ let calendarDate = new Date();
 let currentUser = null;
 let userProfile = { nickname: "ゲスト", avatar: "", bio: "" };
 let editingPostId = null;
+let timelineViewMode = 'list';
+let userHomeViewMode = 'list';
+let activeUserHomeId = null;
 
 // --- DOM Elements ---
 const feedGrid = document.getElementById('feedGrid');
@@ -376,28 +379,106 @@ function openProfileModalSetup() {
 }
 
 
+// Tab Switch Helper
+function switchTab(tabName) {
+    // Sync top tabs
+    navTabs.forEach(t => {
+        if (t.dataset.tab === tabName) {
+            t.classList.add('active');
+        } else {
+            t.classList.remove('active');
+        }
+    });
+
+    // Sync bottom nav items
+    const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+    bottomNavItems.forEach(t => {
+        if (t.dataset.tab === tabName) {
+            t.classList.add('active');
+        } else {
+            t.classList.remove('active');
+        }
+    });
+
+    // Switch panels
+    tabPanels.forEach(p => {
+        if (p.id === `tab-${tabName}`) {
+            p.classList.add('active');
+        } else {
+            p.classList.remove('active');
+        }
+    });
+
+    // Perform specific updates based on selected tab
+    if (tabName === 'calendar') {
+        renderCalendar();
+    } else if (tabName === 'likes') {
+        renderLikes();
+    }
+}
+
 // Set up all event listeners
 function initEventListeners() {
-    // Navigation Tabs Switching
+    // Navigation Tabs Switching (Desktop)
     navTabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            navTabs.forEach(t => t.classList.remove('active'));
-            tabPanels.forEach(p => p.classList.remove('active'));
-            
-            tab.classList.add('active');
-            const targetPanel = document.getElementById(`tab-${tab.dataset.tab}`);
-            if (targetPanel) {
-                targetPanel.classList.add('active');
-            }
-
-            // Perform specific updates based on selected tab
-            if (tab.dataset.tab === 'calendar') {
-                renderCalendar();
-            } else if (tab.dataset.tab === 'likes') {
-                renderLikes();
-            }
+            switchTab(tab.dataset.tab);
         });
     });
+
+    // Navigation Tabs Switching (Mobile Bottom Nav)
+    const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+    bottomNavItems.forEach(item => {
+        if (item.dataset.tab) {
+            item.addEventListener('click', () => {
+                switchTab(item.dataset.tab);
+            });
+        }
+    });
+
+    // Floating add button in bottom nav
+    const bottomNavUploadBtn = document.getElementById('bottomNavUploadBtn');
+    if (bottomNavUploadBtn) {
+        bottomNavUploadBtn.addEventListener('click', () => {
+            addMealModal.classList.add('active');
+        });
+    }
+
+    // Timeline View Mode Toggles
+    const timelineListViewBtn = document.getElementById('timelineListViewBtn');
+    const timelineGridViewBtn = document.getElementById('timelineGridViewBtn');
+    if (timelineListViewBtn && timelineGridViewBtn) {
+        timelineListViewBtn.addEventListener('click', () => {
+            timelineListViewBtn.classList.add('active');
+            timelineGridViewBtn.classList.remove('active');
+            timelineViewMode = 'list';
+            renderFeed();
+        });
+        timelineGridViewBtn.addEventListener('click', () => {
+            timelineGridViewBtn.classList.add('active');
+            timelineListViewBtn.classList.remove('active');
+            timelineViewMode = 'grid';
+            renderFeed();
+        });
+    }
+
+    // User Home View Mode Toggles
+    const userHomeListViewBtn = document.getElementById('userHomeListViewBtn');
+    const userHomeGridViewBtn = document.getElementById('userHomeGridViewBtn');
+    if (userHomeListViewBtn && userHomeGridViewBtn) {
+        userHomeListViewBtn.addEventListener('click', () => {
+            userHomeListViewBtn.classList.add('active');
+            userHomeGridViewBtn.classList.remove('active');
+            userHomeViewMode = 'list';
+            if (activeUserHomeId) renderUserHomePosts(activeUserHomeId);
+        });
+        userHomeGridViewBtn.addEventListener('click', () => {
+            userHomeGridViewBtn.classList.add('active');
+            userHomeListViewBtn.classList.remove('active');
+            userHomeViewMode = 'grid';
+            if (activeUserHomeId) renderUserHomePosts(activeUserHomeId);
+        });
+    }
 
     // Timeline Filter Buttons
     filterBtns.forEach(btn => {
@@ -834,7 +915,14 @@ function renderFeed() {
         filteredPosts.sort((a, b) => b.deliciousCount - a.deliciousCount);
     }
 
+    if (timelineViewMode === 'grid') {
+        feedGrid.className = 'posts-grid-view';
+    } else {
+        feedGrid.className = 'feed-grid';
+    }
+
     if (filteredPosts.length === 0) {
+        feedGrid.className = 'feed-grid'; // Reset class for empty state centered layout
         feedGrid.innerHTML = `
             <div class="empty-state">
                 <span class="empty-emoji">🥣</span>
@@ -845,66 +933,82 @@ function renderFeed() {
     }
 
     filteredPosts.forEach(post => {
-        const card = document.createElement('article');
-        card.className = 'post-card';
-        
-        // Handle emoji vs custom image avatar dynamically
-        const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
-        const avatarHtml = isCustomImage 
-            ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
-            : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
-
-        // Check ownership for delete/edit permission
-        const isOwner = db 
-            ? (currentUser && post.userId === currentUser.uid) 
-            : (post.username === 'あなた');
-        
-        const actionButtonsHtml = isOwner 
-            ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
-               <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
-            : '';
-
-        const tagsHtml = getPostTagsHtml(post);
-
-        // Check if current user has liked this post
-        const hasLiked = db
-            ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
-            : (getLikedPostsLocal().includes(post.id));
-        const activeClass = hasLiked ? 'active' : '';
-
-        card.innerHTML = `
-            <div class="post-header">
-                <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
-                    ${avatarHtml}
-                    <span class="post-username">${post.username}</span>
-                </div>
-                <div class="post-meta">
-                    <span class="post-time">${formatDate(post.date)}</span>
-                    <div class="post-badges">
-                        <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
-                        ${actionButtonsHtml}
+        if (timelineViewMode === 'grid') {
+            const item = document.createElement('div');
+            item.className = 'grid-post-item';
+            item.onclick = () => openDetailModal(post.id);
+            item.innerHTML = `
+                <img src="${post.image}" alt="${post.dishName}" class="grid-post-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
+                <div class="grid-post-overlay">
+                    <div class="grid-overlay-item">
+                        <span>🤤</span>
+                        <span>${post.deliciousCount || 0}</span>
                     </div>
                 </div>
-            </div>
-            <div class="post-img-container" onclick="openDetailModal('${post.id}')">
-                <img src="${post.image}" alt="${post.dishName}" class="post-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
-            </div>
-            <div class="post-body">
-                <div class="post-tags-container">${tagsHtml}</div>
-                <h3 class="post-dish-name">${post.dishName}</h3>
-                <p class="post-comment">${post.comment}</p>
-                <div class="post-footer">
-                    <div class="delicious-btn-wrapper">
-                        <button class="delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
-                            <span class="delicious-icon">🤤</span>
-                            <span class="delicious-label">美味しそう！</span>
-                            <span class="delicious-count">${post.deliciousCount || 0}</span>
-                        </button>
+            `;
+            feedGrid.appendChild(item);
+        } else {
+            const card = document.createElement('article');
+            card.className = 'post-card';
+            
+            // Handle emoji vs custom image avatar dynamically
+            const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
+            const avatarHtml = isCustomImage 
+                ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
+                : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
+
+            // Check ownership for delete/edit permission
+            const isOwner = db 
+                ? (currentUser && post.userId === currentUser.uid) 
+                : (post.username === 'あなた');
+            
+            const actionButtonsHtml = isOwner 
+                ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
+                   <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
+                : '';
+
+            const tagsHtml = getPostTagsHtml(post);
+
+            // Check if current user has liked this post
+            const hasLiked = db
+                ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
+                : (getLikedPostsLocal().includes(post.id));
+            const activeClass = hasLiked ? 'active' : '';
+
+            card.innerHTML = `
+                <div class="post-header">
+                    <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
+                        ${avatarHtml}
+                        <span class="post-username">${post.username}</span>
+                    </div>
+                    <div class="post-meta">
+                        <span class="post-time">${formatDate(post.date)}</span>
+                        <div class="post-badges">
+                            <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
+                            ${actionButtonsHtml}
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-        feedGrid.appendChild(card);
+                <div class="post-img-container" onclick="openDetailModal('${post.id}')">
+                    <img src="${post.image}" alt="${post.dishName}" class="post-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
+                </div>
+                <div class="post-body">
+                    <div class="post-tags-container">${tagsHtml}</div>
+                    <h3 class="post-dish-name">${post.dishName}</h3>
+                    <p class="post-comment"><span class="caption-user" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">${post.username}</span>${post.comment || 'メモはありません。'}</p>
+                    <div class="post-footer">
+                        <div class="delicious-btn-wrapper">
+                            <button class="delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
+                                <span class="delicious-icon">🤤</span>
+                                <span class="delicious-label">美味しそう！</span>
+                                <span class="delicious-count">${post.deliciousCount || 0}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            feedGrid.appendChild(card);
+        }
     });
 }
 
@@ -1290,6 +1394,7 @@ function openDetailModal(postId) {
 // --- User Profile Home Modal Logic ---
 function openUserHome(targetUserId) {
     if (!targetUserId) return;
+    activeUserHomeId = targetUserId;
 
     userHomeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-light);">読み込み中...</div>';
     userHomeModal.classList.add('active');
@@ -1390,66 +1495,90 @@ function openUserHome(targetUserId) {
 function renderUserHomePosts(targetUserId) {
     const userPosts = posts.filter(p => p.userId === targetUserId);
     userHomeGrid.innerHTML = '';
+
+    if (userHomeViewMode === 'grid') {
+        userHomeGrid.className = 'posts-grid-view';
+    } else {
+        userHomeGrid.className = 'feed-grid';
+    }
+
     if (userPosts.length === 0) {
+        userHomeGrid.className = 'feed-grid';
         userHomeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 13px;">まだ投稿がありません。</div>';
         return;
     }
 
     userPosts.forEach(post => {
-        const card = document.createElement('div');
-        card.className = 'post-card';
-        
-        const tagsHtml = getPostTagsHtml(post);
-        const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
-        const avatarHtml = isCustomImage 
-            ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
-            : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
-            
-        const isOwner = db 
-            ? (currentUser && post.userId === currentUser.uid) 
-            : (post.username === 'あなた');
-            
-        const actionButtonsHtml = isOwner 
-            ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
-               <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
-            : '';
-
-        const hasLiked = db
-            ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
-            : (getLikedPostsLocal().includes(post.id));
-        const activeClass = hasLiked ? 'active' : '';
-
-        card.innerHTML = `
-            <div class="post-header">
-                <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
-                    ${avatarHtml}
-                    <span class="post-username">${post.username}</span>
-                </div>
-                <div class="post-meta">
-                    <span class="post-time">${formatDate(post.date)}</span>
-                    <div class="post-badges">
-                        <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
-                        ${actionButtonsHtml}
+        if (userHomeViewMode === 'grid') {
+            const item = document.createElement('div');
+            item.className = 'grid-post-item';
+            item.onclick = () => openDetailModal(post.id);
+            item.innerHTML = `
+                <img src="${post.image}" alt="${post.dishName}" class="grid-post-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
+                <div class="grid-post-overlay">
+                    <div class="grid-overlay-item">
+                        <span>🤤</span>
+                        <span>${post.deliciousCount || 0}</span>
                     </div>
                 </div>
-            </div>
-            <div class="post-img-container" onclick="openDetailModal('${post.id}')">
-                <img src="${post.image}" class="post-img" alt="${post.dishName}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
-            </div>
-            <div class="post-body">
-                <div class="post-tags-container">${tagsHtml}</div>
-                <h3 class="post-dish-name" style="margin-top: 4px; margin-bottom: 8px;">${post.dishName}</h3>
-                <p class="post-comment">${post.comment || 'メモはありません。'}</p>
-                <div class="post-actions">
-                    <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
-                        <span class="btn-emoji">🤤</span>
-                        <span class="btn-text">美味しそう！</span>
-                        <span class="delicious-count">${post.deliciousCount || 0}</span>
-                    </button>
+            `;
+            userHomeGrid.appendChild(item);
+        } else {
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            
+            const tagsHtml = getPostTagsHtml(post);
+            const isCustomImage = post.avatar && (post.avatar.startsWith('data:image/') || post.avatar.startsWith('http'));
+            const avatarHtml = isCustomImage 
+                ? `<img src="${post.avatar}" class="post-avatar-img" alt="アバター">` 
+                : `<div class="post-avatar">${post.avatar || '🍴'}</div>`;
+                
+            const isOwner = db 
+                ? (currentUser && post.userId === currentUser.uid) 
+                : (post.username === 'あなた');
+                
+            const actionButtonsHtml = isOwner 
+                ? `<button class="edit-post-btn" onclick="handleEditPostClick('${post.id}', event)" title="編集">✏️</button>
+                   <button class="delete-post-btn" onclick="handleDeletePostClick('${post.id}', event)" title="削除">🗑️</button>` 
+                : '';
+
+            const hasLiked = db
+                ? (currentUser && post.deliciousUsers && post.deliciousUsers.includes(currentUser.uid))
+                : (getLikedPostsLocal().includes(post.id));
+            const activeClass = hasLiked ? 'active' : '';
+
+            card.innerHTML = `
+                <div class="post-header">
+                    <div class="post-user-info" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">
+                        ${avatarHtml}
+                        <span class="post-username">${post.username}</span>
+                    </div>
+                    <div class="post-meta">
+                        <span class="post-time">${formatDate(post.date)}</span>
+                        <div class="post-badges">
+                            <span class="post-badge type-${post.mealType}">${getMealTypeLabel(post.mealType)}</span>
+                            ${actionButtonsHtml}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        `;
-        userHomeGrid.appendChild(card);
+                <div class="post-img-container" onclick="openDetailModal('${post.id}')">
+                    <img src="${post.image}" class="post-img" alt="${post.dishName}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60'">
+                </div>
+                <div class="post-body">
+                    <div class="post-tags-container">${tagsHtml}</div>
+                    <h3 class="post-dish-name" style="margin-top: 4px; margin-bottom: 8px;">${post.dishName}</h3>
+                    <p class="post-comment"><span class="caption-user" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">${post.username}</span>${post.comment || 'メモはありません。'}</p>
+                    <div class="post-actions">
+                        <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
+                            <span class="btn-emoji">🤤</span>
+                            <span class="btn-text">美味しそう！</span>
+                            <span class="delicious-count">${post.deliciousCount || 0}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            userHomeGrid.appendChild(card);
+        }
     });
 }
 
@@ -1723,7 +1852,7 @@ function renderLikes() {
             <div class="post-body">
                 <div class="post-tags-container">${tagsHtml}</div>
                 <h3 class="post-dish-name" style="margin-top: 4px; margin-bottom: 8px;">${post.dishName}</h3>
-                <p class="post-comment">${post.comment || 'メモはありません。'}</p>
+                <p class="post-comment"><span class="caption-user" onclick="if('${post.userId || ''}') openUserHome('${post.userId}')">${post.username}</span>${post.comment || 'メモはありません。'}</p>
                 <div class="post-actions">
                     <button class="action-btn delicious-btn ${activeClass}" onclick="handleDeliciousClick(this, '${post.id}', event)">
                         <span class="btn-emoji">🤤</span>

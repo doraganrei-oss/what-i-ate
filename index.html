@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=2.29">
+    <link rel="stylesheet" href="styles.css?v=2.30">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-2V65GWTWRE"></script>
     <script>
@@ -106,8 +106,12 @@
             <!-- Timeline Section -->
             <section id="tab-timeline" class="tab-panel active">
                 <div class="timeline-header-panel">
-                    <div class="timeline-title-row">
-                        <h2>みんなのごはんフィード 🍽️</h2>
+                    <div class="timeline-title-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <h2 style="margin: 0;">みんなのごはんフィード 🍽️</h2>
+                        <div class="view-toggle-buttons" style="display: flex; gap: 4px;">
+                            <button class="view-toggle-btn active" id="timelineListViewBtn" title="フィード表示" style="background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm);">☰</button>
+                            <button class="view-toggle-btn" id="timelineGridViewBtn" title="グリッド表示" style="background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm);">田</button>
+                        </div>
                     </div>
                     
                     <div class="timeline-filter-dashboard">
@@ -641,8 +645,12 @@
             </div>
             
             <!-- Posts Section Divider -->
-            <div class="user-home-divider">
-                <span>投稿一覧</span>
+            <div class="user-home-divider" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 12px; width: 100%;">
+                <span style="font-weight: 800; color: var(--text-main); font-size: 13px;">投稿一覧</span>
+                <div class="view-toggle-buttons" style="display: flex; gap: 4px;">
+                    <button class="view-toggle-btn active" id="userHomeListViewBtn" title="フィード表示" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm);">☰</button>
+                    <button class="view-toggle-btn" id="userHomeGridViewBtn" title="グリッド表示" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm);">田</button>
+                </div>
             </div>
             
             <!-- Scrollable User Posts Grid -->
@@ -652,6 +660,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Bottom Navigation Bar for Mobile -->
+        <nav class="bottom-nav-bar" style="display: none;">
+            <button class="bottom-nav-item active" data-tab="timeline">
+                <span class="bottom-nav-icon">🕒</span>
+                <span class="bottom-nav-label">フィード</span>
+            </button>
+            <button class="bottom-nav-item" data-tab="calendar">
+                <span class="bottom-nav-icon">📅</span>
+                <span class="bottom-nav-label">カレンダー</span>
+            </button>
+            <button class="bottom-nav-item upload-trigger-btn" id="bottomNavUploadBtn">
+                <span class="bottom-nav-icon-plus">➕</span>
+            </button>
+            <button class="bottom-nav-item" data-tab="likes">
+                <span class="bottom-nav-icon">💛</span>
+                <span class="bottom-nav-label">お気に入り</span>
+            </button>
+            <button class="bottom-nav-item" data-tab="gacha">
+                <span class="bottom-nav-icon">🎰</span>
+                <span class="bottom-nav-label">ガチャ</span>
+            </button>
+        </nav>
     </div>
 
     <!-- User List Modal (Followers / Following) -->
@@ -671,7 +702,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Application Logic -->
-    <script src="app.js?v=2.29"></script>
+    <script src="app.js?v=2.30"></script>
 
     <!-- Cloudflare Web Analytics -->
     <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c7d041f0daef40a7a218e30539e66cb9"}'></script>
